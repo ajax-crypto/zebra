@@ -120,7 +120,47 @@ namespace zebra
         return std::move(result);
     }
     
-     
+    namespace 
+    {
+    
+        template <typename T>
+        Set<Set<T>>
+        subset_helper(const Set<T>& set, std::size_t size, Set<typename Set<T>::const_iterator>& skip)
+        {
+            Set<Set<T>> result ;
+            if (size == 2)
+                for (auto it = set.cbegin(); it != set.cend(); ++it)
+                    for (auto jt = set.cbegin(); jt != set.cend(); ++jt)
+                        if (skip.find(it) == skip.cend() &&
+                            skip.find(jt) == skip.cend())
+                            result.insert(Set<T>({ *it, *jt }));
+            else
+            {
+                for (auto it = set.cbegin(); it != set.cend(); ++it)
+                {
+                    skip.insert(it);
+                    auto tmp = subset_helper(set, size-1, skip);
+                    for (auto jt = tmp.cbegin(); jt != tmp.cend(); ++jt)
+                    {
+                        Set<T> ins({ *it });
+                        ins.insert(jt->cbegin(), jt->cend());
+                        result.insert(ins);
+                    }
+                }
+            }
+            return std::move(result) ;
+        }
+    
+    }
+    
+    template <typename T>
+    Set<Set<T>>
+    subsets(const Set<T>& set, std::size_t size)
+    {
+        Set<typename Set<T>::const_iterator> skips ;
+        return subset_helper(set, size, skips);
+    }
+    
 }
 
 #endif
