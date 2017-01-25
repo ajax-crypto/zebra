@@ -37,9 +37,8 @@ namespace zebra
         
         void check();
         
-        template <typename A> friend Set<A> operator*(const A&, const Group<A>&);
-        template <typename A> friend Set<A> operator*(const Group<A>&, const A&);
         template <typename A> friend Set<Set<A>> operator/(const Group<A>&, const Group<A>&);
+        template <typename A> friend bool is_homomorphism(const Group<A>&, const Group<A>&, const Mapping<A, A>&);
     };
     
     template <typename T>
@@ -88,7 +87,7 @@ namespace zebra
             throw Exception(NOT_CONFORMANT, "The set does not form a subgroup...");
         Set<T> result ;
         for (auto&& x : set)
-            result.insert(*_table[key_t(_set.find(value), _set.find(x))]);
+            result.insert(at(x, value));
         return std::move(result);
     }
 
@@ -102,7 +101,7 @@ namespace zebra
             throw Exception(NOT_CONFORMANT, "The group does not form a subgroup...");
         Set<T> result ;
         for (auto&& x : group._set)
-            result.insert(*_table[key_t(_set.find(value), _set.find(x))]);
+            result.insert(at(x, value));
         return std::move(result);
     }
 
@@ -116,7 +115,7 @@ namespace zebra
             throw Exception(NOT_CONFORMANT, "The set does not form a subgroup...");
         Set<T> result ;
         for (auto&& x : set)
-            result.insert(*_table[key_t(_set.find(x), _set.find(value))]);
+            result.insert(at(value, x));
         return std::move(result);
     }
 
@@ -130,7 +129,7 @@ namespace zebra
             throw Exception(NOT_CONFORMANT, "The group does not form a subgroup...");
         Set<T> result ;
         for (auto&& x : group._set)
-            result.insert(*_table[key_t(_set.find(x), _set.find(value))]);
+            result.insert(at(value, x));
         return std::move(result);
     }
 
@@ -197,7 +196,7 @@ namespace zebra
         for (auto&& x : _set)
         {
             for (auto&& y : group._set)
-                temp.insert(*_table[key_t(_set.find(x), _set.find(y))]);
+                temp.insert(at(x, y));
             quotient.insert(temp);
             temp.clear();
         }   
@@ -207,6 +206,17 @@ namespace zebra
     template <typename A> Set<Set<A>> operator/(const Group<A>& lhs, const Group<A>& rhs)
     {
         return lhs.quotient(rhs);
+    }
+
+    template <typename A> bool is_homomorphism(const Group<A>& lhs, const Group<A>& rhs, const Mapping<A, A>& map)
+    {
+        for (auto&& x : lhs._set)
+            for (auto&& y : lhs._set)
+            {
+                if (map(lhs.at(x, y)) != rhs.at(map(x), map(y)))
+                    return false;
+            }
+        return true;
     }
     
     template <typename T>
