@@ -54,9 +54,9 @@ namespace zebra
     PartialOperation<T>::operator()(T first, T second) const
     {
         if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
-            throw Exception("Parameters not in codomain...");
+            throw Exception(DOES_NOT_EXIST, "Parameters not in codomain...");
         if (!exists(first, second))
-            throw Exception("No result exists...");
+            throw Exception(DOES_NOT_EXIST, "No result exists...");
         return at(first, second);
     }
     
@@ -65,9 +65,9 @@ namespace zebra
     PartialOperation<T>::operator()(const T& first, const T& second) const
     {
         if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
-            throw Exception("Parameters not in codomain...");
+            throw Exception(DOES_NOT_EXIST, "Parameters not in codomain...");
         if (!exists(first, second))
-            throw Exception("No result exists...");
+            throw Exception(DOES_NOT_EXIST, "No result exists...");
         return at(first, second);
     }
     
@@ -110,7 +110,7 @@ namespace zebra
         auto pairs = make_pairs(_set, _set);
         for (auto&& pair : pairs)
             if (_table.count(pair) == 0)
-                throw Exception("Given function is partial in nature...");
+                throw Exception(NOT_CONFORMANT, "Given function is partial in nature...");
     }
     
     template <typename T>
@@ -137,7 +137,7 @@ namespace zebra
         {
             auto result = func(pair.first, pair.second);
             if (_set.find(result) == _set.cend())
-                throw Exception("Given function is not closed...");
+                throw Exception(NOT_CONFORMANT, "Given function is not closed...");
              _table[param_type(_itr(pair.first), _itr(pair.second))] = _itr(result);
         }
     }
