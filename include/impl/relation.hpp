@@ -456,13 +456,6 @@ namespace zebra
         return zebra::all(_from, _from, _codomain, [this](auto x, auto y, auto z) -> bool {
             return (this->exists(x, z) && this->exists(y, z) && x == y);
         });
-        
-        /*auto pairs = make_pairs(_from, _from);
-        for (const auto& pair : pairs)
-            for (const auto& y : _codomain)
-                if (exists(pair.first, y) && exists(pair.second, y) && !(pair.first == pair.second))
-                    return false;
-        return true;*/
     }
     
     template <typename D, typename R>
@@ -472,13 +465,6 @@ namespace zebra
         return zebra::all(_codomain, _codomain, _from, [this](auto x, auto y, auto z) -> bool {
             return (this->exists(x, y) && this->exists(x, z) && z == y);
         });
-        
-        /*auto pairs = make_pairs(_codomain, _codomain);
-        for (const auto& x : _from)
-            for (auto&& pair : pairs)
-                if (exists(x, pair.first) && exists(x, pair.second) && !(pair.first == pair.second))
-                    return false;
-        return true;*/
     }
     
     template <typename D, typename R>
@@ -524,11 +510,6 @@ namespace zebra
             return zebra::all(_relation, [this](auto x) -> bool {
                 return this->exists(x, x);
             });
-            
-            /*for (const auto& pair : _relation)
-                if (!exists(*pair.first, *pair.first))
-                    return false;
-            return true ;*/
         }
         return false;
     }
@@ -542,11 +523,6 @@ namespace zebra
             return !zebra::any(_relation, [this](auto x) {
                 return this->exists(x, x);
             });
-            
-            /*for (const auto& pair : _relation)
-                if (exists(*pair.first, *pair.first))
-                    return false;
-            return true ;*/
         }
         return false;
     }
@@ -560,12 +536,6 @@ namespace zebra
             return zebra::all2(_relation, [this](auto x, auto y) -> bool {
                 return this->exists(y, x);
             });
-            
-            /*for (const auto& pair : _relation)
-                for (const auto& element : pair.second)
-                    if (_exists(element, pair.first))
-                        return false;
-            return true;*/
         }
         return false ;
     }
@@ -579,12 +549,6 @@ namespace zebra
             return !zebra::any2(_relation, [this](auto x, auto y) -> bool {
                 return this->exists(y, x);
             });
-            
-            /*for (const auto& pair : _relation)
-                for (const auto& element : pair.second)
-                    if (_exists(element, pair.first))
-                        return false;
-            return true;*/
         }
         return false ;
     }
@@ -598,12 +562,6 @@ namespace zebra
             return zebra::all2(_relation, [this](auto x, auto y) -> bool {
                 return this->exists(y, x) ? x == y : true;
             });
-            
-            /*for (const auto& pair : _relation)
-                for (const auto& element : pair.second)
-                    if (_exists(element, pair.first) && !(*element == *pair.first))
-                        return false;
-            return true;*/
         }
         return false ;
     }
@@ -617,15 +575,6 @@ namespace zebra
             return zebra::all2(_from, [this](auto x, auto y) -> bool {
                 return this->exists(x, y) || this->exists(y, x);
             });
-            
-            /*auto set = all();
-            auto pairs = make_pairs(set, set, [](const auto& set, auto lhs, auto rhs){
-                std::find(set.cbegin(), set.cend(), Pair<D, R>(rhs, lhs)) == set.cend();
-            });
-            for (const auto& pair : pairs)
-                if (!exists(pair) && !exists(invert(pair)))
-                    return false ;
-            return true;*/
         }
         return false ;
     }
@@ -639,20 +588,6 @@ namespace zebra
             return zebra::all2(_from, [this](auto x, auto y) -> bool {
                 return this->exists(x, y) || this->exists(y, x) || x == y;
             });
-            
-            /*auto set = all();
-            auto pairs = make_pairs(set, set, [](const Set<Pair<D, R>>& set, const D& first, const R& second){ 
-                return std::find(set.cbegin(), set.cend(), Pair<D, R>(second, first)) != set.cend() ;
-            });
-            for (const auto& pair : pairs)
-            {
-                auto rel = !exists(pair);
-                auto inv = !exists(invert(pair));
-                auto eql = pair.first == pair.second;
-                if (!(rel || inv || eql) || !(rel ^ inv ^ eql))
-                    return false ;
-            }
-            return true;*/
         }
         return false ;
     }
@@ -677,18 +612,6 @@ namespace zebra
             return zebra::all3(_relation, [this](auto x, auto y, auto z) -> bool {
                 return this->exists(x, y) && this->exists(y, z) && this->exists(x, z);
             });
-            
-            /*
-            for (auto&& pair : _relation)
-                for (auto&& element : pair.second)
-                    if (_relation.count(element) > 0)
-                    {
-                        auto check = _relation.at(element);
-                        for (auto&& c : check)
-                            if (!_exists(pair.first, c))
-                                return false;
-                    }
-            return true ;*/
         }
         return false ;
     }

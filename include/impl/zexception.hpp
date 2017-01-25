@@ -12,7 +12,8 @@ namespace zebra
         NOT_IN_CODOMAIN,
         NOT_IN_DOMAIN,
         NOT_CONFORMANT,
-        DOES_NOT_EXIST
+        DOES_NOT_EXIST,
+        NOT_A_MEMBER
     };
 
     class Exception
