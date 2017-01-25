@@ -130,7 +130,7 @@ namespace zebra
     Mapping<D, R>::at(const D& val) const 
     {
         if (_codomain.find(val) == _codomain.cend())
-            throw Exception(NOT_IN_CODOMAIN, "Parameter not in codomain...");
+            throw Exception(DOES_NOT_EXIST, "Parameter not in codomain...");
         return *(_relation.get(val)->cbegin());
     }
     

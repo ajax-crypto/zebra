@@ -9,7 +9,7 @@ namespace zebra
     template <typename A, typename B> using HashMap = std::unordered_map<A, B>;
     template <typename, typename> class BinaryRelation;
     template <typename A, typename B> using Pair = std::pair<A, B>;
-    
+
     template <typename A, typename B, typename C>
     struct Triple
     {
@@ -58,7 +58,7 @@ namespace zebra
         stream << "}";
         return stream;
     }
-    
+
     template <typename A, typename B>
     Set<Pair<A, B>> make_pairs(const Set<A>& lhs, const Set<B>& rhs)
     {
@@ -313,6 +313,17 @@ namespace zebra
                 if (first == second)    
                     result.insert(first);
         return std::move(result);
+    }
+
+    template <typename A>
+    Set<A>
+    operator*(const Set<A>& lhs, const Set<A>& rhs)
+    {
+        Set<A> product ;
+        for (auto&& x : lhs)
+            for (auto&& y : rhs)
+                product.insert(Pair<A, A>(x, y));
+        return product;
     }
     
     template <typename A, typename E>

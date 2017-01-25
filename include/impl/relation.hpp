@@ -82,6 +82,7 @@ namespace zebra
         
         bool   exists(const D&, const R&) const ;
         bool   exists(const Pair<D, R>&) const ;
+        bool   exists(const D&) const;
         void   process(BinaryRelationProperty) ;
         Set<R> range() const ;
         Set<D> domain() const ;
@@ -134,7 +135,7 @@ namespace zebra
         HOM(bool) semi_order() const ;     // TODO
         HOM(bool) acyclic() const { return transitive_closure().antisymmetric(); }
         
-        HOM(Set<R>)                 equivalence_class(const D&);
+        HOM(Set<R>)                 equivalence_class(const D&) const;
         HOM(qset_type)              quotient_set() const ;
         HOM2(Mapping<D, qset_type>) projection() const ;
         HOM2(BinaryRelation<D, R>)  reflexive_closure() const ;
@@ -387,6 +388,13 @@ namespace zebra
     {
         return exists(pair.first, pair.second);
     }
+
+    template <typename D, typename R>
+    bool
+    BinaryRelation<D, R>::exists(const D& dval) const
+    {
+        return _relation.count(_ditr(dval)) > 0;
+    }
     
     template <typename D, typename R>
     BinaryRelation<D, R>
@@ -454,7 +462,7 @@ namespace zebra
     BinaryRelation<D, R>::injective() const
     {
         return zebra::all(_from, _from, _codomain, [this](auto x, auto y, auto z) -> bool {
-            return (this->exists(x, z) && this->exists(y, z) && x == y);
+            return (this->exists(x, z) && this->exists(y, z)) ? x == y : true;
         });
     }
     
@@ -463,7 +471,7 @@ namespace zebra
     BinaryRelation<D, R>::functional() const
     {
         return zebra::all(_codomain, _codomain, _from, [this](auto x, auto y, auto z) -> bool {
-            return (this->exists(x, y) && this->exists(x, z) && z == y);
+            return (this->exists(x, y) && this->exists(x, z)) ? z == y : true;
         });
     }
     
@@ -676,6 +684,16 @@ namespace zebra
         for (auto&& element : project._from)
             project.add(element, equivalence_class(element));
         return std::move(project);
+    }
+
+    template <typename D, typename R>
+    HOM(Set<R>)
+    BinaryRelation<D, R>::equivalence_class(const D& element) const
+    {
+        Set<R> result ;
+        if (equivalence())
+            return afterset(element);
+        return std::move(result);
     }
     
     template <typename A, typename B> 

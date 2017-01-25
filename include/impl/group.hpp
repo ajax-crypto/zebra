@@ -2,6 +2,7 @@
 #define ZEBRA_GROUP
 
 #include "monoid.hpp"
+#include <limits>
 
 namespace zebra
 {
@@ -31,6 +32,11 @@ namespace zebra
         bool     subgroup(const Group<T>&) const ;
         bool     normal_subgroup(const Set<T>&) const ;
         bool     normal_subgroup(const Group<T>&) const ;
+        bool     simple() const ;
+        uint64_t order() const { return _set.size(); }
+        uint64_t order(const T&) const ;
+        bool     pgroup(int64_t) const ;
+        bool     direct_sum(const Group<T>&, const Group<T>&) const ;
         Set<Set<T>> quotient(const Group<T>&) const ;
         
     protected:
@@ -38,7 +44,10 @@ namespace zebra
         void check();
         
         template <typename A> friend Set<Set<A>> operator/(const Group<A>&, const Group<A>&);
+        template <typename A> friend Group<A> operator*(const Group<A>&, const Group<A>&);
         template <typename A> friend bool is_homomorphism(const Group<A>&, const Group<A>&, const Mapping<A, A>&);
+
+        template <typename A> friend class GroupHomomorphism; 
     };
     
     template <typename T>
@@ -186,6 +195,78 @@ namespace zebra
     }
 
     template <typename T>
+    bool
+    Group<T>::simple() const 
+    {
+        if (!normal_subgroup(*this))
+            return false;
+        if (at(_identity, _identity) != _identity)
+            return false;
+        auto subs = subsets(_set);
+        for (auto&& sub : subs)
+            if (normal_subgroup(sub))
+                return false ;
+        return true;
+    }
+
+    template <typename T>
+    bool
+    Group<T>::direct_sum(const Group<T>& lhs, const Group<T>& rhs) const
+    {
+        if (!normal_subgroup(lhs) || !normal_subgroup(rhs))
+            return false;
+        auto result = intersection(lhs._set, rhs._set);
+        if (result.size() != 1 || *result.cbegin() != _identity)
+            return false;
+        result = combination(lhs._set, rhs._set);
+        HashMap<T, unsigned> count ;
+        for (auto&& c : _set)
+            count[c] = 0u;
+        for (auto&& x : result)
+            for (auto&& y : result)
+                count[at(x, y)]++ ;
+        for (auto&& c : _set)
+            if (count[c] == 0u)
+                return false;
+        return true;
+    }
+
+    template <typename T>
+    uint64_t
+    Group<T>::order(const T& element) const
+    {
+        uint64_t period = 0u;
+        while (period < std::numeric_limits<uint64_t>::max())
+        {
+            element = at(element, element);
+            if (element == _identity)
+                return period ;
+            ++period;
+        }
+        return std::numeric_limits<uint64_t>::max();
+    }
+
+    template <typename T>
+    bool
+    Group<T>::pgroup(int64_t prime) const 
+    {
+        for (auto&& element : _set)
+        {
+            int64_t product = prime, exp = 0u ;
+            while (product < std::numeric_limits<uint64_t>::max())
+            {
+                for (; exp < product; ++exp)
+                    element = at(element, element);
+                if (element != _identity)
+                    product *= prime ;
+            }
+            if (product >= std::numeric_limits<uint64_t>::max())
+                return false ;
+        }
+        return true;
+    }
+
+    template <typename T>
     Set<Set<T>>
     Group<T>::quotient(const Group<T>& group) const 
     {
@@ -208,13 +289,31 @@ namespace zebra
         return lhs.quotient(rhs);
     }
 
+    template <typename A> Group<A> operator*(const Group<A>& lhs, const Group<A>& rhs)
+    {
+        Group<Pair<A, A>> group ;
+        typedef typename Set<Pair<A, A>>::const_iterator itr;
+        group._set = lhs._set * rhs._set ;
+        for (auto&& pair1 : group._set)
+            for (auto&& pair2 : group._set)
+            {
+                auto g = lhs.at(pair1.first, pair2.first);
+                auto h = rhs.at(pair1.second, pair2.second);
+                auto index = Pair<itr, itr>(group._set.find(pair1.first, pair2.first), 
+                    group._set.find(pair1.second, pair2.second));
+                group._table[index] = group._set.find(Pair<A, A>(g, h));
+            }
+        return group;
+    }
+
     template <typename A> bool is_homomorphism(const Group<A>& lhs, const Group<A>& rhs, const Mapping<A, A>& map)
     {
         for (auto&& x : lhs._set)
             for (auto&& y : lhs._set)
             {
-                if (map(lhs.at(x, y)) != rhs.at(map(x), map(y)))
-                    return false;
+                if (map.exists(lhs.at(x, y)) && map.exists(x) && map.exists(y))
+                    if (map(lhs.at(x, y)) != rhs.at(map(x), map(y)))
+                        return false;
             }
         return true;
     }
@@ -269,6 +368,64 @@ namespace zebra
             throw Exception(NOT_CONFORMANT, "Not all pairs are commutative");
     }
     
+    template <typename T>
+    class GroupHomomorphism
+    {
+    public:
+        GroupHomomorphism(const Group<T>& lhs, const Group<T>& rhs, const Mapping<T, T>& map)
+            : _domain{lhs}, _codomain{rhs}, _mapping{map} { check(); }
+
+        Set<T> kernel() const ;
+        Set<T> image()  const ;
+        bool   monomorphism() const { return _mapping.injective(); }
+        bool   epimorphism() const { return _mapping.surjective(); }
+        bool   isomorphism() const { return _mapping.bijection(); }
+        bool   endomorphism() const { return _domain == _codomain; }
+        bool   automorphism() const { return endomorphism() && isomorphism(); }
+
+    protected:
+
+        void check();
+
+        Group<T> _domain, _codomain ;
+        Mapping<T, T> _mapping ;
+    };
+
+    template <typename T>
+    void
+    GroupHomomorphism<T>::check()
+    {
+        for (auto&& x : _domain._set)
+            for (auto&& y : _codomain._set)
+            {
+                if (_mapping.exists(_domain.at(x, y)) && _mapping.exists(x) && _mapping.exists(y))
+                    if (_mapping(_domain.at(x, y)) != _codomain.at(_mapping(x), _mapping(y)))
+                        throw Exception(NOT_CONFORMANT, "It is not a homomorphism...");
+            }
+    }
+
+    template <typename T>
+    Set<T>
+    GroupHomomorphism<T>::kernel() const
+    {
+        Set<T> result;
+        for (auto&& x : _domain._set)
+            if (_mapping.exists(x) && _mapping(x) == _codomain._identity)
+                result.insert(x);
+        return result;
+    }
+
+    template <typename T>
+    Set<T>
+    GroupHomomorphism<T>::image() const
+    {
+        Set<T> result;
+        for (auto&& x : _domain._set)
+            if (_mapping.exists(x))
+                result.insert(x);
+        return result;
+    }
+
 }
 
 #endif
