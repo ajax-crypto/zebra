@@ -15,6 +15,9 @@ namespace zebra
         using typename Magma<T>::entry_type;
         using typename Magma<T>::table_type;
         using typename Magma<T>::iter ;
+        using Magma<T>::idempotent;
+        using Magma<T>::commutative;
+        using Magma<T>::associative;
         
         SemiGroup() {}
         SemiGroup(const table_type&, const Set<T>&);
@@ -27,32 +30,32 @@ namespace zebra
         bool separative() const ;
         
         ISB(Set<T>)  principal_left_ideal(T) const ;
-        ISBN(Set<T>) principal_left_ideal(const T&) const ;
+        ISNB(Set<T>) principal_left_ideal(const T&) const ;
         ISB(Set<T>)  principal_right_ideal(T) const ;
-        ISBN(Set<T>) principal_right_ideal(const T&) const ;
+        ISNB(Set<T>) principal_right_ideal(const T&) const ;
         ISB(Set<T>)  principal_ideal(T) const ;
-        ISBN(Set<T>) principal_ideal(const T&) const ;
+        ISNB(Set<T>) principal_ideal(const T&) const ;
         
-        ISB(BinaryRelation<T, T>) L(T, T) const ;
-        ISB(BinaryRelation<T, T>) R(T, T) const ;
-        ISB(BinaryRelation<T, T>) J(T, T) const ;
-        ISB(BinaryRelation<T, T>) H(T, T) const ;
-        ISB(BinaryRelation<T, T>) D(T, T) const ;
+        ISB2(BinaryRelation<T, T>) L(T, T) const ;
+        ISB2(BinaryRelation<T, T>) R(T, T) const ;
+        ISB2(BinaryRelation<T, T>) J(T, T) const ;
+        ISB2(BinaryRelation<T, T>) H(T, T) const ;
+        ISB2(BinaryRelation<T, T>) D(T, T) const ;
         
     protected:
         using Magma<T>::_set ;
         using Magma<T>::_table ;
         using Magma<T>::_itr ;
         
-        void check() throw(std::exception);
+        void check() throw(Exception);
     };
     
     template <typename T>
     void
-    SemiGroup<T>::check() throw(std::exception)
+    SemiGroup<T>::check() throw(Exception)
     {
         if(!associative())
-            throw std::exception("Operation is not associative...");
+            throw Exception(NOT_CONFORMANT, "Operation is not associative...");
     }
     
     template <typename T>

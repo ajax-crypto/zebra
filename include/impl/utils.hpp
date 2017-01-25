@@ -108,7 +108,7 @@ namespace zebra
     {
         for (auto&& x : lhs)
             for (auto&& y : rhs)
-                function(x, y));
+                function(x, y);
     }
     
     template <typename A, typename B, typename C, typename F>
@@ -195,6 +195,12 @@ namespace zebra
                             return true;
         return false ;
     }
+
+    template <typename A, typename F>
+    bool any2(const Set<A>& a, F&& function)
+    {
+        return any(a, a, function);
+    }
     
     template <typename A, typename F>
     bool all(const Set<A>& a, F&& function)
@@ -223,28 +229,38 @@ namespace zebra
         return all(a, a, a, a, function);
     }
     
-    template <typename A, typename B> using RelType = HashMap<typename A::const_iterator, Set<typename B::const_iterator>>;
+    template <typename A, typename B> using RelType = HashMap<typename Set<A>::const_iterator, Set<typename Set<B>::const_iterator>>;
     
-    template <typename A, typename B, typename F>
-    bool all(const RelType<A, B> rel, F&& function)
+    template <typename A, typename F>
+    bool all(const A& rel, F&& function)
     {
         for (auto&& x : rel)
-             if(!function(*(x.first))
+             if(!function(*(x.first)))
                 return false ;
         return true ;
     }
     
-    template <typename A, typename B, typename F>
-    bool any(const RelType<A, B> rel, F&& function)
+    template <typename A, typename F>
+    bool any(const A& rel, F&& function)
     {
         for (auto&& x : rel)
-             if(function(*(x.first))
+             if(function(*(x.first)))
                 return true ;
         return false ;
     }
+
+    template <typename A, typename F>
+    bool any2(const A& rel, F&& function)
+    {
+        for (auto&& x : rel)
+            for (auto&& y : x.second)
+                if(function(*(x.first), *y))
+                    return true;   
+        return false ;
+    }
     
-    template <typename A, typename B, typename F>
-    bool all2(const RelType<A, B> rel, F&& function)
+    template <typename A, typename F>
+    bool all2(const A& rel, F&& function)
     {
         for (auto&& x : rel)
             for (auto&& y : x.second)
@@ -254,13 +270,13 @@ namespace zebra
     }
     
     template <typename A, typename F>
-    bool all3(const RelType<A, A> rel, F&& function)
+    bool all3(const A& rel, F&& function)
     {
         for (auto&& x : rel)
             for (auto&& y : x.second)
                 if (rel.count(y) > 0)
-                    for (auto&& z : rel.at(y))
-                        if(!function(*(x.first), *y, *(z.first)))
+                    for (auto z : rel.at(y))
+                        if(!function(*(x.first), *y, *z))
                             return false;   
         return true ;
     }

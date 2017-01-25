@@ -17,6 +17,7 @@ namespace zebra
         using typename Magma<T>::iter ;
         using Magma<T>::unital;
         using Magma<T>::at ;
+        using Magma<T>::commutative;
         
         QuasiGroup() {}
         QuasiGroup(const table_type&, const Set<T>&);
@@ -33,7 +34,7 @@ namespace zebra
         bool total_antisymmetric() const ;
         
     protected:
-        void check() throw(std::exception);  
+        void check() throw(Exception);  
         
         using Magma<T>::_set ;
     };
@@ -42,7 +43,7 @@ namespace zebra
     // Cayley table of the operation is a Latin square or not!
     template <typename T>
     void
-    QuasiGroup<T>::check() throw(std::exception)
+    QuasiGroup<T>::check() throw(Exception)
     {
         for (auto&& x : _set)
         {
@@ -54,10 +55,10 @@ namespace zebra
             }
             for (auto it = counts1.cbegin(); it != counts1.cend(); ++it)
                 if (it->second > 1u)
-                    throw std::exception("Does not satisfy divisibility property...");
+                    throw Exception(NOT_CONFORMANT, "Does not satisfy divisibility property...");
             for (auto it = counts2.cbegin(); it != counts2.cend(); ++it)
                 if (it->second > 1u)
-                    throw std::exception("Does not satisfy divisibility property...");
+                    throw Exception(NOT_CONFORMANT, "Does not satisfy divisibility property...");
         }
     }
     

@@ -8,6 +8,13 @@ namespace zebra
     template <typename T>
     class Group : public Monoid<T>
     {
+    public:
+        using typename Magma<T>::table_type;
+        using typename Magma<T>::bin_op_type;
+        using typename Magma<T>::iter;
+        using Monoid<T>::_set;
+        using Monoid<T>::at;
+        using Monoid<T>::_identity;
         
         Group() {}
         Group(const table_type&, const Set<T>&);
@@ -63,19 +70,27 @@ namespace zebra
         {
             bool flag = false;
             for (auto&& y : _set)
-                flag ||= (at(x, y) == _identity && at(y, x) == _identity);
+                flag = flag || (at(x, y) == _identity && at(y, x) == _identity);
             if (!flag)
-                throw std::exception("Not all elements have an inverse...");
+                throw Exception(NOT_CONFORMANT, "Not all elements have an inverse...");
         }
     }
     
     template <typename T>
     class AbelianGroup : public Group<T>
     {
-        Group() {}
-        Group(const table_type&, const Set<T>&);
-        Group(iter, iter, const Set<T>&);
-        Group(bin_op_type&&, const Set<T>&);
+    public:
+        using typename Group<T>::table_type;
+        using typename Group<T>::bin_op_type;
+        using typename Group<T>::iter;
+        using Group<T>::_set;
+        using Group<T>::at;
+        using Group<T>::_identity;
+
+        AbelianGroup() {}
+        AbelianGroup(const table_type&, const Set<T>&);
+        AbelianGroup(iter, iter, const Set<T>&);
+        AbelianGroup(bin_op_type&&, const Set<T>&);
            
     protected:
         
@@ -104,11 +119,11 @@ namespace zebra
     }
     
     template <typename T>
-    void AbelianGroup<T>::check() throw(std::exception)
+    void AbelianGroup<T>::check()
     {
         Group<T>::check();
         if (!Magma<T>::commutative())
-            throw std::exception("Not all pairs are commutative");
+            throw Exception(NOT_CONFORMANT, "Not all pairs are commutative");
     }
     
 }

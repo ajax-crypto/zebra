@@ -50,15 +50,15 @@ namespace zebra
         using BinaryRelation<D, R>::_from ;
         
     private:
-        void check() throw(std::exception); 
+        void check() throw(Exception); 
     };
     
     template <typename D, typename R>
     void
-    Mapping<D, R>::check() throw(std::exception)
+    Mapping<D, R>::check() throw(Exception)
     {
         if (!function())
-            throw std::exception("Given parameters do not form a function/mapping...");
+            throw Exception(NOT_CONFORMANT, "Given parameters do not form a function/mapping...");
     }
     
     template <typename D, typename R>
@@ -130,7 +130,7 @@ namespace zebra
     Mapping<D, R>::at(const D& val) const 
     {
         if (_codomain.find(val) == _codomain.cend())
-            throw std::exception("Parameter not in codomain...");
+            throw Exception(NOT_IN_CODOMAIN, "Parameter not in codomain...");
         return *(_relation.get(val)->cbegin());
     }
     

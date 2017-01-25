@@ -9,21 +9,22 @@ namespace zebra
     class Quandle : public Rack<T>
     {
         
+    public:
         bool involutory() const ;
         
     protected:
         
-        void check() throw(std::exception);
+        void check() throw(Exception);
     };
     
     template <typename T>
-    void Quandle<T>::check() throw(std::exception)
+    void Quandle<T>::check() throw(Exception)
     {
         auto cond = all(_set, [this](auto x) {
             return at(x, x) == x ;
         });
         if (!Rack<T>::check() || !cond)
-            throw std::exception("Not a quandle...");
+            throw Exception(NOT_CONFORMANT, "Not a quandle...");
     }
     
     template <typename T>

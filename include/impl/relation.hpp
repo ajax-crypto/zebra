@@ -453,8 +453,8 @@ namespace zebra
     bool
     BinaryRelation<D, R>::injective() const
     {
-        return all(_from, _from, _codomain, [&](auto x, auto y, auto z) {
-            return (exists(x, z) && exists(y, z) && x == y);
+        return zebra::all(_from, _from, _codomain, [this](auto x, auto y, auto z) -> bool {
+            return (this->exists(x, z) && this->exists(y, z) && x == y);
         });
         
         /*auto pairs = make_pairs(_from, _from);
@@ -469,8 +469,8 @@ namespace zebra
     bool
     BinaryRelation<D, R>::functional() const
     {
-        return all(_codomain, _codomain, _from, [&](auto x, auto y, auto z) {
-            return (exists(x, y) && exists(x, z) && z == y);
+        return zebra::all(_codomain, _codomain, _from, [this](auto x, auto y, auto z) -> bool {
+            return (this->exists(x, y) && this->exists(x, z) && z == y);
         });
         
         /*auto pairs = make_pairs(_codomain, _codomain);
@@ -521,9 +521,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            
-            return all(_relation, [this](auto x) {
-                return exists(x, x);
+            return zebra::all(_relation, [this](auto x) -> bool {
+                return this->exists(x, x);
             });
             
             /*for (const auto& pair : _relation)
@@ -540,8 +539,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return !any(_relation, [this](auto x) {
-                return exists(x, x);
+            return !zebra::any(_relation, [this](auto x) {
+                return this->exists(x, x);
             });
             
             /*for (const auto& pair : _relation)
@@ -558,8 +557,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return all2(_relation, [this](auto x, auto y) {
-                return exists(y, x);
+            return zebra::all2(_relation, [this](auto x, auto y) -> bool {
+                return this->exists(y, x);
             });
             
             /*for (const auto& pair : _relation)
@@ -577,8 +576,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return !any2(_relation, [this](auto x, auto y) {
-                return exists(y, x);
+            return !zebra::any2(_relation, [this](auto x, auto y) -> bool {
+                return this->exists(y, x);
             });
             
             /*for (const auto& pair : _relation)
@@ -596,8 +595,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return all2(_relation, [this](auto x, auto y) {
-                return exists(y, x) && x == y;
+            return zebra::all2(_relation, [this](auto x, auto y) -> bool {
+                return this->exists(y, x) ? x == y : true;
             });
             
             /*for (const auto& pair : _relation)
@@ -615,8 +614,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return all2(_from, [this](auto x, auto y) {
-                return exists(x, y) || exists(y, x);
+            return zebra::all2(_from, [this](auto x, auto y) -> bool {
+                return this->exists(x, y) || this->exists(y, x);
             });
             
             /*auto set = all();
@@ -637,8 +636,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return all2(_from, [this](auto x, auto y) {
-                return exists(x, y) || exists(y, x) || x == y;
+            return zebra::all2(_from, [this](auto x, auto y) -> bool {
+                return this->exists(x, y) || this->exists(y, x) || x == y;
             });
             
             /*auto set = all();
@@ -675,8 +674,8 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            return all3(_relation, [this](auto x, auto y, auto z) {
-                return exists(x, y) && exists(y, z) && exists(x, z);
+            return zebra::all3(_relation, [this](auto x, auto y, auto z) -> bool {
+                return this->exists(x, y) && this->exists(y, z) && this->exists(x, z);
             });
             
             /*

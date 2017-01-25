@@ -8,6 +8,6 @@
 #include <type_traits>
 #include <functional>
 #include <iostream>
-#include <exception>
+#include "zexception.hpp"
 
 #endif

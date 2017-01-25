@@ -5,13 +5,15 @@
 #define _NHOM(X) typename std::enable_if<!std::is_same<D, R>::value, X>::type 
 #define _HOM2(X, Y) typename std::enable_if<std::is_same<D, R>::value, X , Y>::type
 #define _HOM3(X, Y, Z) typename std::enable_if<std::is_same<D, R>::value, X , Y , Z>::type
-#define _ISB(X) typename std::enable_if<std::is_arithmetic<T>::value, X>::type 
+#define _ISB(X) typename std::enable_if<std::is_arithmetic<T>::value, X>::type
+#define _ISB2(X, Y) typename std::enable_if<std::is_arithmetic<T>::value, X,Y>::type
 #define _ISNB(X) typename std::enable_if<!std::is_arithmetic<T>::value, X>::type 
 #define HOM(X) _HOM(X)
 #define NHOM(x) _NHOM(X)
 #define HOM2(X, Y) _HOM2(X, Y)
 #define HOM3(X, Y, Z) _HOM3(X, Y, Z)
 #define ISB(X) _ISB(X)
+#define ISB2(X, Y) _ISB2(X, Y)
 #define ISNB(X) _ISNB(X)
 
 #define CREATE_ITERATOR_KEYS(type, converter) \

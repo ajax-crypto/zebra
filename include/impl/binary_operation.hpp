@@ -22,11 +22,11 @@ namespace zebra
         ISB(T)     operator()(T, T) const ;
         ISNB(T)    operator()(const T&, const T&) const ;
         ISB(T)     at(T x, T y) const { return _table.at(param_type(_itr(x), _itr(y))); }
-        ISNB(T)    at(const T& x, const T y&) const { return _table.at(param_type(_itr(x), _itr(y))); }
+        ISNB(T)    at(const T& x, const T& y) const { return _table.at(param_type(_itr(x), _itr(y))); }
         iter       cbegin() const { return _table.cbegin(); }
         iter       cend() const { return _table.cend(); }
-        ISB(bool)  exists(T, T) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
-        ISNB(bool) exists(const T&, const T&) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
+        ISB(bool)  exists(T x, T y) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
+        ISNB(bool) exists(const T& x, const T& y) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
         
     protected:
         
@@ -54,9 +54,9 @@ namespace zebra
     PartialOperation<T>::operator()(T first, T second) const
     {
         if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
-            throw std::exception("Parameters not in codomain...");
+            throw Exception("Parameters not in codomain...");
         if (!exists(first, second))
-            throw std::exception("No result exists...");
+            throw Exception("No result exists...");
         return at(first, second);
     }
     
@@ -65,9 +65,9 @@ namespace zebra
     PartialOperation<T>::operator()(const T& first, const T& second) const
     {
         if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
-            throw std::exception("Parameters not in codomain...");
+            throw Exception("Parameters not in codomain...");
         if (!exists(first, second))
-            throw std::exception("No result exists...");
+            throw Exception("No result exists...");
         return at(first, second);
     }
     
@@ -99,18 +99,18 @@ namespace zebra
         using PartialOperation<T>::_table ;
         using PartialOperation<T>::_itr ;
         
-        void check() throw(std::exception);
+        void check() throw(Exception);
         
     };
     
     template <typename T>
     void
-    BinaryOperation<T>::check() throw(std::exception)
+    BinaryOperation<T>::check() throw(Exception)
     {
         auto pairs = make_pairs(_set, _set);
         for (auto&& pair : pairs)
             if (_table.count(pair) == 0)
-                throw std::exception("Given function is partial in nature...");
+                throw Exception("Given function is partial in nature...");
     }
     
     template <typename T>
@@ -137,8 +137,8 @@ namespace zebra
         {
             auto result = func(pair.first, pair.second);
             if (_set.find(result) == _set.cend())
-                throw std::exception("Given function is not closed...");
-             _table.[param_type(_itr(pair.first), _itr(pair.second))] = _itr(result);
+                throw Exception("Given function is not closed...");
+             _table[param_type(_itr(pair.first), _itr(pair.second))] = _itr(result);
         }
     }
     

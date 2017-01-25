@@ -12,11 +12,11 @@ namespace zebra
         
     protected:
         
-        void check() throw(std::exception);
+        void check() throw(Exception);
     };
     
     template <typename T>
-    void Rack<T>::check() throw(std::exception)
+    void Rack<T>::check() throw(Exception)
     {
         bool assoc = all3(_set, [this](auto a, auto b, auto c) {
             return at(a, at(b, c)) == at(at(a, b), at(a, c));
@@ -34,7 +34,7 @@ namespace zebra
                 break;
             }
         if (!assoc || !uniq)
-            throw std::exception("Not a rack...");
+            throw Exception(NOT_CONFORMANT, "Not a rack...");
     }
 }
 

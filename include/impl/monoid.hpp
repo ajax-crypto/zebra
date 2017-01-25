@@ -31,15 +31,15 @@ namespace zebra
         using SemiGroup<T>::_set ;
         T     _identity ;      
           
-        void check() throw(std::exception);
+        void check() throw(Exception);
     };
     
     template <typename T>
     void
-    Monoid<T>::check() throw(std::exception)
+    Monoid<T>::check() throw(Exception)
     {
          if (!unital(_identity))
-            throw std::exception("No identity element exists...");
+            throw Exception(NOT_CONFORMANT, "No identity element exists...");
     }
     
     template <typename T>
