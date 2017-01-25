@@ -8,15 +8,43 @@ namespace zebra
     template <typename T> using Set = std::unordered_set<T>;
     template <typename A, typename B> using HashMap = std::unordered_map<A, B>;
     template <typename, typename> class BinaryRelation;
+    template <typename A, typename B> using Pair = std::pair<A, B>;
+    
+    template <typename A, typename B, typename C>
+    struct Triple
+    {
+        A first ;
+        B second ;
+        C third ;
+        
+        Triple() {}
+        Triple(const A& a, const B& b, const C& c)
+            : first{a}, second{b}, third{c}
+        {}
+    };
+    
+    template <typename A, typename B, typename C, typename D>
+    struct Quadruple
+    {
+        A first ;
+        B second ;
+        C third ;
+        D fourth ;
+        
+        Quadruple() {}
+        Quadruple(const A& a, const B& b, const C& c, const D& d)
+            : first{a}, second{b}, third{c}, fourth{d}
+        {}
+    };
     
     template <typename A, typename B>
-    std::pair<B, A> invert(const std::pair<A, B>& pair)
+    Pair<B, A> invert(const Pair<A, B>& pair)
     {
-        return std::pair<B, A>(pair.first, pair.second);
+        return Pair<B, A>(pair.first, pair.second);
     }
     
     template <typename A, typename B>
-    bool operator==(const std::pair<A, B>& lhs, const std::pair<A, B>& rhs)
+    bool operator==(const Pair<A, B>& lhs, const Pair<A, B>& rhs)
     {
         return lhs.first == rhs.first && lhs.second == rhs.second;
     }
@@ -32,24 +60,209 @@ namespace zebra
     }
     
     template <typename A, typename B>
-    Set<std::pair<A, B>> make_pairs(const Set<A>& lhs, const Set<B>& rhs)
+    Set<Pair<A, B>> make_pairs(const Set<A>& lhs, const Set<B>& rhs)
     {
-        Set<std::pair<A, B>> result ;
+        Set<Pair<A, B>> result ;
         for (auto&& first : lhs)
             for (auto&& second : rhs)
-                result.insert(std::pair<A, B>(first, second));
+                result.insert(Pair<A, B>(first, second));
         return std::move(result);
     }
     
     template <typename A, typename B, typename P>
-    Set<std::pair<A, B>> make_pairs(const Set<A>& lhs, const Set<B>& rhs, P&& predicate)
+    Set<Pair<A, B>> make_pairs(const Set<A>& lhs, const Set<B>& rhs, P&& predicate)
     {
-        Set<std::pair<A, B>> result ;
+        Set<Pair<A, B>> result ;
         for (auto&& first : lhs)
             for (auto&& second : rhs)
                 if(predicate(first, second))
-                    result.insert(std::pair<A, B>(first, second));
+                    result.insert(Pair<A, B>(first, second));
         return std::move(result);
+    }
+    
+    template <typename A, typename B, typename C>
+    Set<Triple<A, B, C>> make_triples(const Set<A>& a, const Set<B>& b, const Set<C>& c)
+    {
+        Set<Triple<A, B, C>> result ;
+        for (auto&& first : a)
+            for (auto&& second : b)
+                for (auto&& third : c)
+                    result.insert(Triple<A, B, C>(first, second, third));
+        return std::move(result);
+    }
+    
+    template <typename A, typename B, typename C, typename D>
+    Set<Quadruple<A, B, C, D>> make_quads(const Set<A>& a, const Set<B>& b, const Set<C>& c, const Set<D>& d)
+    {
+        Set<Quadruple<A, B, C, D>> result ;
+        for (auto&& first : a)
+            for (auto&& second : b)
+                for (auto&& third : c)
+                    for (auto&& fourth : d)
+                        result.insert(Quadruple<A, B, C, D>(first, second, third, fourth));
+        return std::move(result);
+    }
+    
+    template <typename A, typename B, typename F>
+    void each(const Set<A>& lhs, const Set<B>& rhs, F&& function)
+    {
+        for (auto&& x : lhs)
+            for (auto&& y : rhs)
+                function(x, y));
+    }
+    
+    template <typename A, typename B, typename C, typename F>
+    void each(const Set<A>& a, const Set<B>& b, const Set<C>& c, F&& function)
+    {
+        for (auto&& x : a)
+            for (auto&& y : b)
+                for (auto&& z: b)
+                    function(x, y, z);
+    }
+    
+    template <typename A, typename B, typename C, typename D, typename F>
+    void each(const Set<A>& a, const Set<B>& b, const Set<C>& c, const Set<D>& d, F&& function)
+    {
+        for (auto&& w : a)
+            for (auto&& x : b)
+                for (auto&& y : c)
+                    for (auto&& z : d)
+                        function(w, x, y, z);
+    }
+    
+    template <typename A, typename B, typename F>
+    bool all(const Set<A>& lhs, const Set<B>& rhs, F&& function)
+    {
+        for (auto&& x : lhs)
+            for (auto&& y : rhs)
+                if(!function(x, y))
+                    return false;   
+        return true ;
+    }
+    
+    template <typename A, typename B, typename C, typename F>
+    bool all(const Set<A>& a, const Set<B>& b, const Set<C>& c, F&& function)
+    {
+        for (auto&& x : a)
+            for (auto&& y : b)
+                for (auto&& z: b)
+                    if(!function(x, y, z))
+                        return false ;  
+        return true ; 
+    }
+    
+    template <typename A, typename B, typename C, typename D, typename F>
+    bool all(const Set<A>& a, const Set<B>& b, const Set<C>& c, const Set<D>& d, F&& function)
+    {
+        for (auto&& w : a)
+            for (auto&& x : b)
+                for (auto&& y : c)
+                    for (auto&& z : d)
+                        if(!function(w, x, y, z))
+                            return false;
+        return true ;
+    }
+    
+    template <typename A, typename B, typename F>
+    bool any(const Set<A>& lhs, const Set<B>& rhs, F&& function)
+    {
+        for (auto&& x : lhs)
+            for (auto&& y : rhs)
+                if(function(x, y))
+                    return true;   
+        return false ;
+    }
+    
+    template <typename A, typename B, typename C, typename F>
+    bool any(const Set<A>& a, const Set<B>& b, const Set<C>& c, F&& function)
+    {
+        for (auto&& x : a)
+            for (auto&& y : b)
+                for (auto&& z: b)
+                    if(function(x, y, z))
+                        return true ;  
+        return false ; 
+    }
+    
+    template <typename A, typename B, typename C, typename D, typename F>
+    bool any(const Set<A>& a, const Set<B>& b, const Set<C>& c, const Set<D>& d, F&& function)
+    {
+        for (auto&& w : a)
+            for (auto&& x : b)
+                for (auto&& y : c)
+                    for (auto&& z : d)
+                        if(function(w, x, y, z))
+                            return true;
+        return false ;
+    }
+    
+    template <typename A, typename F>
+    bool all(const Set<A>& a, F&& function)
+    {
+        for (auto&& x : a)
+            if(!function(x))
+                return false ;
+        return true ;
+    }
+    
+    template <typename A, typename F>
+    bool all2(const Set<A>& a, F&& function)
+    {
+        return all(a, a, function);
+    }
+    
+    template <typename A, typename F>
+    bool all3(const Set<A>& a, F&& function)
+    {
+        return all(a, a, a, function);
+    }
+    
+    template <typename A, typename F>
+    bool all4(const Set<A>& a, F&& function)
+    {
+        return all(a, a, a, a, function);
+    }
+    
+    template <typename A, typename B> using RelType = HashMap<typename A::const_iterator, Set<typename B::const_iterator>>;
+    
+    template <typename A, typename B, typename F>
+    bool all(const RelType<A, B> rel, F&& function)
+    {
+        for (auto&& x : rel)
+             if(!function(*(x.first))
+                return false ;
+        return true ;
+    }
+    
+    template <typename A, typename B, typename F>
+    bool any(const RelType<A, B> rel, F&& function)
+    {
+        for (auto&& x : rel)
+             if(function(*(x.first))
+                return true ;
+        return false ;
+    }
+    
+    template <typename A, typename B, typename F>
+    bool all2(const RelType<A, B> rel, F&& function)
+    {
+        for (auto&& x : rel)
+            for (auto&& y : x.second)
+                if(!function(*(x.first), *y))
+                    return false;   
+        return true ;
+    }
+    
+    template <typename A, typename F>
+    bool all3(const RelType<A, A> rel, F&& function)
+    {
+        for (auto&& x : rel)
+            for (auto&& y : x.second)
+                if (rel.count(y) > 0)
+                    for (auto&& z : rel.at(y))
+                        if(!function(*(x.first), *y, *(z.first)))
+                            return false;   
+        return true ;
     }
     
     template <typename A, typename B>

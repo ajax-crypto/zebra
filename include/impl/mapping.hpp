@@ -36,6 +36,7 @@ namespace zebra
         
         R at(const D& val) const ;
         R operator()(const D& val) const ;
+        Mapping<R, D> inverse() const ;
         qset_type kernel() const; 
         
         using BinaryRelation<D, R>::domain ;
@@ -116,7 +117,7 @@ namespace zebra
     {
         typename BinaryRelation<D, R>::qset_type result ;
         auto pairs = make_pairs(domain(), [](const auto& set, const auto& first, const auto& second){ 
-            return std::find(set.cbegin(), set.cend(), std::pair<D, R>(second, first)) != set.cend() && first != second ;
+            return std::find(set.cbegin(), set.cend(), Pair<D, R>(second, first)) != set.cend() && first != second ;
         });
         for (const auto& pair : pairs)
             if (at(pair.first) == at(pair.second))
@@ -128,6 +129,8 @@ namespace zebra
     R
     Mapping<D, R>::at(const D& val) const 
     {
+        if (_codomain.find(val) == _codomain.cend())
+            throw std::exception("Parameter not in codomain...");
         return *(_relation.get(val)->cbegin());
     }
     

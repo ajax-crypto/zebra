@@ -53,7 +53,7 @@ namespace zebra
     public:
         
         typedef Set<Set<R>>                        qset_type;
-        typedef Set<std::pair<D, R>>               pset_type;
+        typedef Set<Pair<D, R>>                    pset_type;
         typedef typename pset_type::const_iterator piter ;
         typedef typename Set<D>::const_iterator    diter ;
         typedef typename Set<R>::const_iterator    riter ;
@@ -81,11 +81,11 @@ namespace zebra
         iter        cend() const { return _relation.cend(); }
         
         bool   exists(const D&, const R&) const ;
-        bool   exists(const std::pair<D, R>&) const ;
+        bool   exists(const Pair<D, R>&) const ;
         void   process(BinaryRelationProperty) ;
         Set<R> range() const ;
         Set<D> domain() const ;
-        Set<std::pair<D, R>> allpairs() const ;
+        Set<Pair<D, R>> allpairs() const ;
         Set<R> afterset(const D& val) const ;
         Set<D> foreset(const R&) const ;
         
@@ -159,7 +159,7 @@ namespace zebra
         
         HOM(Set<D>) all() const ;
         void      add(const D&, const R&);
-        void      add(const std::pair<D, R>&);
+        void      add(const Pair<D, R>&);
         void      add(const D&, riter, riter);       
         diter     _ditr(const D&) const ;
         riter     _ritr(const R&) const ;
@@ -190,7 +190,7 @@ namespace zebra
     
     template <typename D, typename R>
     void
-    BinaryRelation<D, R>::add(const std::pair<D, R>& pair)
+    BinaryRelation<D, R>::add(const Pair<D, R>& pair)
     {
         add(pair.first, pair.second);
     }
@@ -367,10 +367,10 @@ namespace zebra
     typename BinaryRelation<D, R>::pset_type
     BinaryRelation<D, R>::allpairs() const
     {
-        Set<std::pair<D, R>> result ;
+        Set<Pair<D, R>> result ;
         for (auto&& pair : _relation)
             for (auto&& element : pair.second)
-                result.insert(std::pair<D, R>(*pair.first, *element));
+                result.insert(Pair<D, R>(*pair.first, *element));
         return std::move(result);
     }
     
@@ -383,7 +383,7 @@ namespace zebra
     
     template <typename D, typename R>
     bool
-    BinaryRelation<D, R>::exists(const std::pair<D, R>& pair) const
+    BinaryRelation<D, R>::exists(const Pair<D, R>& pair) const
     {
         return exists(pair.first, pair.second);
     }
@@ -453,24 +453,32 @@ namespace zebra
     bool
     BinaryRelation<D, R>::injective() const
     {
-        auto pairs = make_pairs(_from, _from);
+        return all(_from, _from, _codomain, [&](auto x, auto y, auto z) {
+            return (exists(x, z) && exists(y, z) && x == y);
+        });
+        
+        /*auto pairs = make_pairs(_from, _from);
         for (const auto& pair : pairs)
             for (const auto& y : _codomain)
                 if (exists(pair.first, y) && exists(pair.second, y) && !(pair.first == pair.second))
                     return false;
-        return true;
+        return true;*/
     }
     
     template <typename D, typename R>
     bool
     BinaryRelation<D, R>::functional() const
     {
-        auto pairs = make_pairs(_codomain, _codomain);
+        return all(_codomain, _codomain, _from, [&](auto x, auto y, auto z) {
+            return (exists(x, y) && exists(x, z) && z == y);
+        });
+        
+        /*auto pairs = make_pairs(_codomain, _codomain);
         for (const auto& x : _from)
             for (auto&& pair : pairs)
                 if (exists(x, pair.first) && exists(x, pair.second) && !(pair.first == pair.second))
                     return false;
-        return true;
+        return true;*/
     }
     
     template <typename D, typename R>
@@ -513,10 +521,15 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            for (const auto& pair : _relation)
+            
+            return all(_relation, [this](auto x) {
+                return exists(x, x);
+            });
+            
+            /*for (const auto& pair : _relation)
                 if (!exists(*pair.first, *pair.first))
                     return false;
-            return true ;
+            return true ;*/
         }
         return false;
     }
@@ -527,10 +540,14 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            for (const auto& pair : _relation)
+            return !any(_relation, [this](auto x) {
+                return exists(x, x);
+            });
+            
+            /*for (const auto& pair : _relation)
                 if (exists(*pair.first, *pair.first))
                     return false;
-            return true ;
+            return true ;*/
         }
         return false;
     }
@@ -541,11 +558,15 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            for (const auto& pair : _relation)
+            return all2(_relation, [this](auto x, auto y) {
+                return exists(y, x);
+            });
+            
+            /*for (const auto& pair : _relation)
                 for (const auto& element : pair.second)
                     if (_exists(element, pair.first))
                         return false;
-            return true;
+            return true;*/
         }
         return false ;
     }
@@ -556,11 +577,15 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            for (const auto& pair : _relation)
+            return !any2(_relation, [this](auto x, auto y) {
+                return exists(y, x);
+            });
+            
+            /*for (const auto& pair : _relation)
                 for (const auto& element : pair.second)
                     if (_exists(element, pair.first))
                         return false;
-            return true;
+            return true;*/
         }
         return false ;
     }
@@ -571,11 +596,15 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            for (const auto& pair : _relation)
+            return all2(_relation, [this](auto x, auto y) {
+                return exists(y, x) && x == y;
+            });
+            
+            /*for (const auto& pair : _relation)
                 for (const auto& element : pair.second)
                     if (_exists(element, pair.first) && !(*element == *pair.first))
                         return false;
-            return true;
+            return true;*/
         }
         return false ;
     }
@@ -586,14 +615,18 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            auto set = all();
+            return all2(_from, [this](auto x, auto y) {
+                return exists(x, y) || exists(y, x);
+            });
+            
+            /*auto set = all();
             auto pairs = make_pairs(set, set, [](const auto& set, auto lhs, auto rhs){
-                std::find(set.cbegin(), set.cend(), std::pair<D, R>(rhs, lhs)) == set.cend();
+                std::find(set.cbegin(), set.cend(), Pair<D, R>(rhs, lhs)) == set.cend();
             });
             for (const auto& pair : pairs)
                 if (!exists(pair) && !exists(invert(pair)))
                     return false ;
-            return true;
+            return true;*/
         }
         return false ;
     }
@@ -604,9 +637,13 @@ namespace zebra
     {
         if (_from == _codomain)
         {
-            auto set = all();
-            auto pairs = make_pairs(set, set, [](const Set<std::pair<D, R>>& set, const D& first, const R& second){ 
-                return std::find(set.cbegin(), set.cend(), std::pair<D, R>(second, first)) != set.cend() ;
+            return all2(_from, [this](auto x, auto y) {
+                return exists(x, y) || exists(y, x) || x == y;
+            });
+            
+            /*auto set = all();
+            auto pairs = make_pairs(set, set, [](const Set<Pair<D, R>>& set, const D& first, const R& second){ 
+                return std::find(set.cbegin(), set.cend(), Pair<D, R>(second, first)) != set.cend() ;
             });
             for (const auto& pair : pairs)
             {
@@ -616,7 +653,7 @@ namespace zebra
                 if (!(rel || inv || eql) || !(rel ^ inv ^ eql))
                     return false ;
             }
-            return true;
+            return true;*/
         }
         return false ;
     }
@@ -638,6 +675,11 @@ namespace zebra
     {
         if (_from == _codomain)
         {
+            return all3(_relation, [this](auto x, auto y, auto z) {
+                return exists(x, y) && exists(y, z) && exists(x, z);
+            });
+            
+            /*
             for (auto&& pair : _relation)
                 for (auto&& element : pair.second)
                     if (_relation.count(element) > 0)
@@ -647,7 +689,7 @@ namespace zebra
                             if (!_exists(pair.first, c))
                                 return false;
                     }
-            return true ;
+            return true ;*/
         }
         return false ;
     }
@@ -711,7 +753,7 @@ namespace zebra
         project._from = domain();
         for (auto&& element : project._from)
             project.add(element, equivalence_class(element));
-        return project;
+        return std::move(project);
     }
     
     template <typename A, typename B> 

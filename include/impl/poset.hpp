@@ -7,19 +7,19 @@ namespace zebra
     namespace orders
     {
         template <typename A, typename B>
-        bool lexicographical(const std::pair<A, B>& lhs, const std::pair<A, B>& rhs)
+        bool lexicographical(const Pair<A, B>& lhs, const Pair<A, B>& rhs)
         {
             return lhs.first < rhs.first || lhs.first == rhs.first && (rhs.first < rhs.second || rhs.first == rhs.second);
         }
         
         template <typename A, typename B>
-        bool product(const std::pair<A, B>& lhs, const std::pair<A, B>& rhs)
+        bool product(const Pair<A, B>& lhs, const Pair<A, B>& rhs)
         {
             return lhs.first < rhs.first && lhs.second < rhs.second ;
         }
         
         template <typename A, typename B>
-        bool direct(const std::pair<A, B>& lhs, const std::pair<A, B>& rhs)
+        bool direct(const Pair<A, B>& lhs, const Pair<A, B>& rhs)
         {
             return (lhs.first < rhs.first && lhs.second < rhs.second) || (lhs == rhs) ;
         }
@@ -32,7 +32,7 @@ namespace zebra
     public:
         using typename BinaryRelation<T, T>::pset_type;
         using typename BinaryRelation<T, T>::membership_type;
-        typedef std::pair<T, bool> element_type ;
+        typedef Pair<T, bool> element_type ;
         typedef typename Set<T>::const_iterator iter ;
         
         Poset() {}
@@ -55,11 +55,30 @@ namespace zebra
         template <typename A> friend Poset<T> operator+(const Poset<T>&, const Poset<T>&);
         
     protected:
-        void check() throw(std::exception); 
         
         Set<T>          _set;
         membership_type _order;
     };
+    
+    template <typename T>
+    Poset<T>::Poset(iter start, iter end)
+    {
+        _set = Set<T>{start, end};
+        _order = [](const T& a, const T& b) 
+        {
+            return a < b || a == b ;
+        };
+    }
+    
+    template <typename T>
+    Poset<T>::Poset(const Set<T>& set)
+        : _set{set}
+    {
+        _order = [](const T& a, const T& b) 
+        {
+            return a < b || a == b ;
+        };
+    }
     
     template <typename T>
     Poset<T>::Poset(membership_type&& order,
@@ -67,13 +86,12 @@ namespace zebra
         : _order{order}
     { 
         _set = Set<T>{start, end};
-        check(); 
     }
     
     template <typename T>
     Poset<T>::Poset(membership_type&& order, const Set<T>& set)
         : _order{order}, _set{set}
-    { check(); }
+    { }
     
     template <typename T>
     typename Poset<T>::element_type
@@ -83,10 +101,10 @@ namespace zebra
         for (auto&& x : _set)
             for (auto&& y : _set)
                 if (!(x = y) && !_order(y, x))
-                    g = std::pair<T, bool>(x, true);
+                    g = Pair<T, bool>(x, true);
                 else
                 {
-                    g = std::pair<T, bool>(T{}, false);
+                    g = Pair<T, bool>(T{}, false);
                     break;
                 }
         return g;
@@ -100,10 +118,10 @@ namespace zebra
         for (auto&& x : _set)
             for (auto&& y : _set)
                 if (!(x == y) && !_order(x, y))
-                    g = std::pair<T, bool>(x, true);
+                    g = Pair<T, bool>(x, true);
                 else
                 {
-                    g = std::pair<T, bool>(T{}, false);
+                    g = Pair<T, bool>(T{}, false);
                     break;
                 }
         return g;

@@ -26,10 +26,3 @@
 *.exe
 *.out
 *.app
-
-# Future Files
-include/foundation.hpp
-include/group.hpp
-include/lattice.hpp
-include/poset.hpp
-include/ring.hpp
