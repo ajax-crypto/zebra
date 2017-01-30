@@ -87,7 +87,7 @@ namespace zebra
         Set<R> range() const ;
         Set<D> domain() const ;
         Set<Pair<D, R>> allpairs() const ;
-        Set<R> afterset(const D& val) const ;
+        Set<R> afterset(const D&) const ;
         Set<D> foreset(const R&) const ;
         
         BinaryRelation<D, R> complement() const ;

@@ -36,11 +36,13 @@ namespace zebra
         ISB(Set<T>)  principal_ideal(T) const ;
         ISNB(Set<T>) principal_ideal(const T&) const ;
         
-        ISB2(BinaryRelation<T, T>) L(T, T) const ;
-        ISB2(BinaryRelation<T, T>) R(T, T) const ;
-        ISB2(BinaryRelation<T, T>) J(T, T) const ;
-        ISB2(BinaryRelation<T, T>) H(T, T) const ;
-        ISB2(BinaryRelation<T, T>) D(T, T) const ;
+        bool L(T, T) const ;
+        bool R(T, T) const ;
+        bool J(T, T) const ;
+        bool H(T a, T b) const { return L(a, b) && R(a, b); }
+        bool D(T, T) const ;
+
+        Set<T> Hclass(T, T) const ;
         
     protected:
         using Magma<T>::_set ;
@@ -78,6 +80,81 @@ namespace zebra
     {
         check();
     }
+
+    template <typename T>
+    bool
+    SemiGroup<T>::regular() const 
+    {
+        for (auto&& x : _set)
+        {
+            bool exists = false ;
+            for (auto&& y : _set)
+                if (at(x, at(y, x)) == x && at(y, at(x, y)) == y)
+                {
+                    exists = true ;
+                    break ;
+                }
+            if (!exists)
+                return false;
+        }
+        return true;
+    }
+
+    template <typename T>
+    bool
+    SemiGroup<T>::L(T a, T b)
+    {
+        if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
+            return false;
+        Set<T> lhs, rhs ;
+        lhs.insert(a);
+        rhs.insert(b);
+        for (auto&& x : _set)
+        {
+            lhs.insert(at(x, a));
+            rhs.insert(at(x, b));
+        }
+        return lhs == rhs ;
+    }
+
+    template <typename T>
+    bool
+    SemiGroup<T>::R(T a, T b)
+    {
+        if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
+            return false;
+        Set<T> lhs, rhs ;
+        lhs.insert(a);
+        rhs.insert(b);
+        for (auto&& x : _set)
+        {
+            lhs.insert(at(a, x));
+            rhs.insert(at(b, x));
+        }
+        return lhs == rhs ;
+    }
+
+    template <typename T>
+    bool
+    SemiGroup<T>::J(T a, T b)
+    {
+        if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
+            return false;
+        Set<T> lhs, rhs ;
+        lhs.insert(a);
+        rhs.insert(b);
+        for (auto&& x : _set)
+        {
+            lhs.insert(at(x, a));
+            lhs.insert(at(a, x));
+            lhs.insert(at(x, at(a, x)));
+            rhs.insert(at(x, b));
+            rhs.insert(at(b, x));
+            rhs.insert(at(x, at(b, x)));
+        }
+        return lhs == rhs ;
+    }
+
 }
 
 #endif

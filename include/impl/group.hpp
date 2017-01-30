@@ -46,6 +46,9 @@ namespace zebra
         template <typename A> friend Set<Set<A>> operator/(const Group<A>&, const Group<A>&);
         template <typename A> friend Group<A> operator*(const Group<A>&, const Group<A>&);
         template <typename A> friend bool is_homomorphism(const Group<A>&, const Group<A>&, const Mapping<A, A>&);
+        template <typename A> friend bool is_group(const Set<A>&, const std::function<T(T, T)>&);
+        template <typename A> friend bool is_group(const Set<A>&, const HashMap<Pair<T, T>, T>&);
+        template <typename A> friend bool is_group(const Set<A>&, const Set<Triple<T, T, T>>&);
 
         template <typename A> friend class GroupHomomorphism; 
     };
@@ -149,7 +152,8 @@ namespace zebra
         for (auto&& x : set)
             if (_set.find(x) == _set.cend())
                 return false;
-        return true;
+        auto mapf = [this] (T a, T b) -> T { return this->at(a, b); };
+        return is_group(set, mapf);
     }
 
     template <typename T>
@@ -317,6 +321,65 @@ namespace zebra
             }
         return true;
     }
+
+    template <typename A> bool is_group(const Set<T>& set, const std::function<T(T, T)>& map)
+    {
+        bool closed = all2(set, [&map, &set](auto x, auto y) {
+            return set.find(map(x, y)) != set.end();
+        });
+        if (!closed)
+            return false;
+        bool associative = all3(set, [](auto x, auto y, auto z) {
+            return map(x, map(y, z)) == map(map(x, y), z);
+        });
+        if (!associative)
+            return false;
+        A identity ;
+        bool has_identity = false ;
+        for (auto&& x : set)
+        {
+            identity = x ;
+            for (auto&& y : set)
+            {
+                has_identity = map(x, y) == y && map(y, x) == y; 
+                if (!has_identity)
+                    break;
+            }
+            if (has_identity)
+                break ;
+        }
+        if (!has_identity)
+            return false ;
+        bool has_inverse = false; 
+        for (auto&& x : set)
+        {
+            for (auto&& y : set)
+            {
+                has_inverse = map(x, y) == identity && map(y, x) == identity;
+                if (!has_inverse)
+                    break ;
+            }
+            if (has_inverse)
+                break ;
+        }
+        return has_inverse;
+    }
+
+    template <typename A> bool is_group(const Set<T>& set, const HashMap<Pair<T, T>, T>& map)
+    {
+        auto mapf = [&map] (A a, A b) -> A { return map[Pair<A, A>(a, b)]; };
+        return is_group<A>(set, mapf);
+    }
+
+    template <typename A> bool is_group(const Set<T>& set, const Set<Triple<T, T, T>>& triples)
+    {
+        auto mapf = [&triples] (A a, A b) -> A { 
+            for (auto&& triplet : triples)
+                if (triplet.first == a && triplet.second == b)
+                    return triplet.third;
+        };
+        return is_group<A>(set, mapf);
+    }
     
     template <typename T>
     class AbelianGroup : public Group<T>
@@ -425,6 +488,27 @@ namespace zebra
                 result.insert(x);
         return result;
     }
+
+    template <typename T>
+    class GroupAction
+    {
+    public:
+        enum { LeftAction, RightAction };
+
+        GroupAction(const Group<T>&, const Set<T>&, const Set<Pair<T, T>>&, int = LeftAction);
+        GroupAction(const Group<T>&, const Set<T>&, const Mapping<Pair<T, T>, T>&, int = LeftAction);
+
+        bool transitive() const ;
+        bool faithful() const ;
+        bool free() const ;
+        bool regular() const ;
+        Set<T> orbit(const T&) const ;
+        Set<Pair<T, T>> fixed_points() const ;
+        Set<T> stabilizer_subgroup(const T&) const ;
+
+    protected:
+        Mapping<Pair<T, T>, T> _mapping ; 
+    };
 
 }
 
