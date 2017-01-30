@@ -322,14 +322,14 @@ namespace zebra
         return true;
     }
 
-    template <typename A> bool is_group(const Set<T>& set, const std::function<T(T, T)>& map)
+    template <typename A> bool is_group(const Set<A>& set, const std::function<A(A, A)>& map)
     {
         bool closed = all2(set, [&map, &set](auto x, auto y) {
             return set.find(map(x, y)) != set.end();
         });
         if (!closed)
             return false;
-        bool associative = all3(set, [](auto x, auto y, auto z) {
+        bool associative = all3(set, [&map](auto x, auto y, auto z) {
             return map(x, map(y, z)) == map(map(x, y), z);
         });
         if (!associative)
@@ -365,13 +365,13 @@ namespace zebra
         return has_inverse;
     }
 
-    template <typename A> bool is_group(const Set<T>& set, const HashMap<Pair<T, T>, T>& map)
+    template <typename A> bool is_group(const Set<A>& set, const HashMap<Pair<A, A>, A>& map)
     {
         auto mapf = [&map] (A a, A b) -> A { return map[Pair<A, A>(a, b)]; };
         return is_group<A>(set, mapf);
     }
 
-    template <typename A> bool is_group(const Set<T>& set, const Set<Triple<T, T, T>>& triples)
+    template <typename A> bool is_group(const Set<A>& set, const Set<Triple<A, A, A>>& triples)
     {
         auto mapf = [&triples] (A a, A b) -> A { 
             for (auto&& triplet : triples)

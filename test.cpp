@@ -3,8 +3,9 @@
 int main()
 {
     using namespace zebra;
-    Set<int> set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+    std::cout << "Relation testing..." << std::endl ;
     try {
+        Set<int> set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
         BinaryRelation<int, int> relation{[](int x, int y) { return x <= y; }, set};
         std::cout << relation << std::endl ;
         std::cout << std::boolalpha << std::endl ;

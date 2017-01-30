@@ -102,7 +102,7 @@ namespace zebra
 
     template <typename T>
     bool
-    SemiGroup<T>::L(T a, T b)
+    SemiGroup<T>::L(T a, T b) const
     {
         if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
             return false;
@@ -119,7 +119,7 @@ namespace zebra
 
     template <typename T>
     bool
-    SemiGroup<T>::R(T a, T b)
+    SemiGroup<T>::R(T a, T b) const
     {
         if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
             return false;
@@ -136,7 +136,7 @@ namespace zebra
 
     template <typename T>
     bool
-    SemiGroup<T>::J(T a, T b)
+    SemiGroup<T>::J(T a, T b) const
     {
         if (_set.find(a) == _set.end() || _set.find(b) == _set.end())
             return false;
