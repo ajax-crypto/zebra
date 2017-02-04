@@ -315,14 +315,14 @@ namespace zebra
         return std::move(result);
     }
 
-    template <typename A>
-    Set<A>
-    operator*(const Set<A>& lhs, const Set<A>& rhs)
+    template <typename A, typename B>
+    Set<Pair<A, B>>
+    operator*(const Set<A>& lhs, const Set<B>& rhs)
     {
-        Set<A> product ;
+        Set<Pair<A, B>> product ;
         for (auto&& x : lhs)
             for (auto&& y : rhs)
-                product.insert(Pair<A, A>(x, y));
+                product.insert(Pair<A, B>(x, y));
         return product;
     }
     

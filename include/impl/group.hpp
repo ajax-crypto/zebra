@@ -49,7 +49,8 @@ namespace zebra
         template <typename A> friend bool is_group(const Set<A>&, const std::function<T(T, T)>&);
         template <typename A> friend bool is_group(const Set<A>&, const HashMap<Pair<T, T>, T>&);
         template <typename A> friend bool is_group(const Set<A>&, const Set<Triple<T, T, T>>&);
-
+        
+        template <typename G, typename S> friend class GroupAction;
         template <typename A> friend class GroupHomomorphism; 
     };
     
@@ -489,26 +490,97 @@ namespace zebra
         return result;
     }
 
-    template <typename T>
-    class GroupAction
+    template <typename G, typename S>
+    class GroupAction : public Mapping<Pair<G, S>, S>
     {
     public:
         enum { LeftAction, RightAction };
 
-        GroupAction(const Group<T>&, const Set<T>&, const Set<Pair<T, T>>&, int = LeftAction);
-        GroupAction(const Group<T>&, const Set<T>&, const Mapping<Pair<T, T>, T>&, int = LeftAction);
+        GroupAction(const Group<G>&, const Set<S>&, std::function<S(G, S)>&&, int = LeftAction);
+        GroupAction(const Group<G>&, const Set<S>&, const HashMap<Pair<G, S>, S>&, int = LeftAction);
 
         bool transitive() const ;
         bool faithful() const ;
         bool free() const ;
-        bool regular() const ;
-        Set<T> orbit(const T&) const ;
-        Set<Pair<T, T>> fixed_points() const ;
-        Set<T> stabilizer_subgroup(const T&) const ;
+        bool regular() const { return transitive() && free(); }
+        Set<S> orbit(S) const ;
+        S fixed_point(G) const ;
+        G fixes(S) const ;
+        Set<Pair<G, S>> all_fixed_points() const;
+        Set<G> stabilizer_subgroup(S) const ;
 
     protected:
-        Mapping<Pair<T, T>, T> _mapping ; 
+        using Mapping<Pair<G, S>, S>::_from ;
+        using Mapping<Pair<G, S>, S>::_codomain ;
+        using Mapping<Pair<G, S>, S>::_relation ;
+
+        Set<G> _gset;
     };
+
+    template <typename G, typename S>
+    GroupAction<G, S>::GroupAction(const Group<G>& group, const Set<S>& set, std::function<S(G, S)>&& map, int compatibility)
+    {
+        auto identity = group.identity();
+        for (auto&& x : set)
+            if (map(identity, x) != x)
+                throw Exception(NOT_CONFORMANT, "Identity axiom not satisfied...");
+        bool compatible = compatibility == LeftAction ? 
+        all(group._set, group._set, set, [&map, &group](auto g, auto h, auto x) { 
+            return map(group.at(g, h), x) == map(g, map(h, x));
+        }) :
+        all(group._set, group._set, set, [&map, &group](auto g, auto h, auto x) { 
+            return map(x, group.at(g, h)) == map(map(x, g), h);
+        });
+
+        if (compatible)
+        {
+            _from = group._set * set ;
+            _codomain = set ;
+            _gset = group._set ;
+            all(group._set, set, [this, &map](auto x, auto y) mutable {
+                _relation[Pair<G, S>(x, y)] = map(x, y);
+            });
+        }
+        else
+            throw Exception(NOT_CONFORMANT, "Compatibility failed...");
+    }
+
+    template <typename G, typename S>
+    GroupAction<G, S>::GroupAction(const Group<G>& group, const Set<S>& set, const HashMap<Pair<G, S>, S>& map, int compatibility)
+    {
+        auto mapping = [&map](auto x, auto y) { return map[Pair<G, S>(x, y)]; };
+        GroupAction(group, set, mapping, compatibility);
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::transitive() const 
+    {
+        return all(_codomain, _codomain, [this](auto x, auto y){
+            for (auto&& g : _gset)
+                if (this->at(Pair<G, S>(g, x)) == y)
+                    return true;
+            return false;
+        });
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::faithful() const
+    {
+        return all(_gset, _gset, _codomain, [this](auto g, auto h, auto x){
+            return (g == h) ? true : this->at(Pair<G, S>(g, x)) != this->at(Pair<G, S>(h, x));
+        });
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::free() const
+    {
+        return all(_gset, _gset, _codomain, [this](auto g, auto h, auto x){
+            return this->at(Pair<G, S>(g, x)) == this->at(Pair<G, S>(h, x)) ? g == h : true ;
+        });
+    }
 
 }
 
