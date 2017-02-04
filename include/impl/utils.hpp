@@ -400,6 +400,19 @@ namespace zebra
         Set<typename Set<T>::const_iterator> skips ;
         return subset_helper(set, size, skips);
     }
+
+    template <typename T>
+    Set<Set<T>>
+    all_subsets(const Set<T>& set)
+    {
+        Set<typename Set<T>::const_iterator> skips ;
+        Set<Set<T>> result;
+        result.insert(Set<T>{});
+        for (auto i = 1u; i < set.size(); ++i)
+            combination(result, subsets(set, i));
+        result.insert(set);
+        return result;
+    }
     
 }
 

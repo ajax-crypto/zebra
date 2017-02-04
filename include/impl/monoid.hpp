@@ -12,11 +12,9 @@ namespace zebra
         using typename SemiGroup<T>::bin_op_type;
         using typename SemiGroup<T>::titer ;
         using typename SemiGroup<T>::param_type;
-        using typename SemiGroup<T>::entry_type;
         using typename SemiGroup<T>::table_type;
         using typename SemiGroup<T>::iter ;
-        using SemiGroup<T>::unital ;
-        using SemiGroup<T>::at ;
+        using SemiGroup<T>::identity_extract ;
         
         Monoid() {}
         Monoid(const table_type&, const Set<T>&);
@@ -26,6 +24,7 @@ namespace zebra
         bool trace() const ;
         bool zerosumfree() const ;
         bool inverse_monoid() const ;
+        T    identity() const { return _identity; }
         
     protected:
         using SemiGroup<T>::_set ;
@@ -38,7 +37,7 @@ namespace zebra
     void
     Monoid<T>::check() throw(Exception)
     {
-         if (!unital(_identity))
+         if (!identity_extract(_identity))
             throw Exception(NOT_CONFORMANT, "No identity element exists...");
     }
     
@@ -58,7 +57,7 @@ namespace zebra
     
     template <typename T>
     Monoid<T>::Monoid(bin_op_type&& func, const Set<T>& set)
-        : SemiGroup<T>{func, set}
+        : SemiGroup<T>{std::move(func), set}
     {
         check();
     }
@@ -68,7 +67,7 @@ namespace zebra
     Monoid<T>::trace() const
     {
         return !any2(_set, [this](auto x, auto y) -> bool {
-            return at(x, y) == at(y, x);
+            return this->at(x, y) == this->at(y, x);
         }); 
     }
 }

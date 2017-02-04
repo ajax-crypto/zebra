@@ -19,14 +19,11 @@ namespace zebra
         PartialOperation(const table_type&, const Set<T>&);
         PartialOperation(iter, iter, const Set<T>&);
         
-        ISB(T)     operator()(T, T) const ;
-        ISNB(T)    operator()(const T&, const T&) const ;
-        ISB(T)     at(T x, T y) const { return _table.at(param_type(_itr(x), _itr(y))); }
-        ISNB(T)    at(const T& x, const T& y) const { return _table.at(param_type(_itr(x), _itr(y))); }
-        iter       cbegin() const { return _table.cbegin(); }
-        iter       cend() const { return _table.cend(); }
-        ISB(bool)  exists(T x, T y) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
-        ISNB(bool) exists(const T& x, const T& y) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
+        T     operator()(T, T) const ;
+        T     at(T x, T y) const { return *_table.at(param_type(_itr(x), _itr(y))); }
+        iter  cbegin() const { return _table.cbegin(); }
+        iter  cend() const { return _table.cend(); }
+        bool  exists(T x, T y) const { return _table.count(param_type(_itr(x), _itr(y))) > 0; }
         
     protected:
         
@@ -50,19 +47,8 @@ namespace zebra
     }
     
     template <typename T>
-    ISB(T)
+    T
     PartialOperation<T>::operator()(T first, T second) const
-    {
-        if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
-            throw Exception(DOES_NOT_EXIST, "Parameters not in codomain...");
-        if (!exists(first, second))
-            throw Exception(DOES_NOT_EXIST, "No result exists...");
-        return at(first, second);
-    }
-    
-    template <typename T>
-    ISNB(T)
-    PartialOperation<T>::operator()(const T& first, const T& second) const
     {
         if (_set.find(first) == _set.cend() || _set.find(second) == _set.cend())
             throw Exception(DOES_NOT_EXIST, "Parameters not in codomain...");
@@ -84,7 +70,6 @@ namespace zebra
             std::function<T(const T&, const T&)>>::type bin_op_type;
         using typename PartialOperation<T>::titer ;
         using typename PartialOperation<T>::param_type;
-        using typename PartialOperation<T>::entry_type;
         using typename PartialOperation<T>::table_type;
         using typename PartialOperation<T>::iter ;
         

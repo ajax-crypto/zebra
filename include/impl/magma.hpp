@@ -12,7 +12,6 @@ namespace zebra
     {
     public:
         using BinaryOperation<T>::BinaryOperation ;
-        using BinaryOperation<T>::at ;
         using BinaryOperation<T>::_set;
         
         bool medial() const ;
@@ -41,15 +40,15 @@ namespace zebra
         bool entropic() const ;
         
     protected:
-        bool identity(T&) const ;
+        bool identity_extract(T&) const ;
     };
     
     template <typename T>
     bool
     Magma<T>::medial() const
     {
-        return all4(_set, [this] (auto u, auto v, auto x, auto y) {
-            return at(at(u, v), at(x, y)) == at(at(u, x), at(v, y));
+        return all4(_set, [this] (auto u, auto v, auto x, auto y) -> bool {
+            return this->at(this->at(u, v), this->at(x, y)) == this->at(this->at(u, x), this->at(v, y));
         });
     }
     
@@ -57,8 +56,8 @@ namespace zebra
     bool
     Magma<T>::left_semimedial() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(at(x, x), at(y, z)) == at(at(x, y), at(x, z));
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(this->at(x, x), this->at(y, z)) == this->at(this->at(x, y), this->at(x, z));
         });
     }
     
@@ -66,8 +65,8 @@ namespace zebra
     bool
     Magma<T>::right_semimedial() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(at(y, z), at(x, x)) == at(at(y, x), at(z, x));
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(this->at(y, z), this->at(x, x)) == this->at(this->at(y, x), this->at(z, x));
         });
     }
     
@@ -75,8 +74,8 @@ namespace zebra
     bool
     Magma<T>::left_distributive() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(x, at(y, z)) == at(at(x, y), at(x, z));
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(x, this->at(y, z)) == this->at(this->at(x, y), this->at(x, z));
         });
     }
     
@@ -84,8 +83,8 @@ namespace zebra
     bool
     Magma<T>::right_distributive() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(at(y, z), x) == at(at(y, x), at(z, x));
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(this->at(y, z), x) == this->at(this->at(y, x), this->at(z, x));
         });
     }
     
@@ -93,8 +92,8 @@ namespace zebra
     bool
     Magma<T>::commutative() const
     {
-        return all2(_set, [this] (auto x, auto y) {
-            return at(x, y) == at(y, x);
+        return all2(_set, [this] (auto x, auto y) -> bool {
+            return this->at(x, y) == this->at(y, x);
         });
     }
     
@@ -102,8 +101,8 @@ namespace zebra
     bool
     Magma<T>::idempotent() const
     {
-        return all(_set, [this] (auto x) {
-            return at(x, x) == x ;
+        return all(_set, [this] (auto x) -> bool {
+            return this->at(x, x) == x ;
         });
     }
     
@@ -111,8 +110,8 @@ namespace zebra
     bool
     Magma<T>::unipotent() const
     {
-        return all2(_set, [this] (auto x, auto y) {
-           return at(x, x) == at(y, y); 
+        return all2(_set, [this] (auto x, auto y) -> bool {
+           return this->at(x, x) == this->at(y, y); 
         });
     }
     
@@ -120,9 +119,9 @@ namespace zebra
     bool
     Magma<T>::zeropotent() const
     {
-        return all2(_set, [this] (auto x, auto y) {
-            auto xx = at(x, x);
-            return at(xx, y) == xx && xx == at(y, xx);
+        return all2(_set, [this] (auto x, auto y) -> bool {
+            auto xx = this->at(x, x);
+            return this->at(xx, y) == xx && xx == this->at(y, xx);
         });
     }
     
@@ -130,11 +129,11 @@ namespace zebra
     bool
     Magma<T>::alternative() const
     {
-        return all2(_set, [this] (auto x, auto y) {
-            auto xx = at(x, x);
-            auto yy = at(y, y);
-            auto xy = at(x, y);
-            return at(xx, y) == at(x, xy) && at(x, yy) == at(xy, y);
+        return all2(_set, [this] (auto x, auto y) -> bool {
+            auto xx = this->at(x, x);
+            auto yy = this->at(y, y);
+            auto xy = this->at(x, y);
+            return this->at(xx, y) == this->at(x, xy) && this->at(x, yy) == this->at(xy, y);
         });
     }
     
@@ -142,8 +141,8 @@ namespace zebra
     bool
     Magma<T>::associative() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(at(x, y), z) == at(x, at(y, z));
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(this->at(x, y), z) == this->at(x, this->at(y, z));
         });
     }
     
@@ -151,8 +150,8 @@ namespace zebra
     bool
     Magma<T>::left_unar() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(x, y) == at(x, z);
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(x, y) == this->at(x, z);
         });
     }
     
@@ -160,8 +159,8 @@ namespace zebra
     bool
     Magma<T>::right_unar() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(y, x) == at(z, x);
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(y, x) == this->at(z, x);
         });
     }
     
@@ -170,7 +169,7 @@ namespace zebra
     Magma<T>::null_semigroup() const
     {
         return all4(_set, [this] (auto w, auto x, auto y, auto z) {
-            return at(w, x) == at(y, z);
+            return this->at(w, x) == this->at(y, z);
         });
     }
     
@@ -179,19 +178,19 @@ namespace zebra
     Magma<T>::unital() const
     {
         T result ;
-        return identity(result);
+        return identity_extract(result);
     }
     
     template <typename T>
     bool
-    Magma<T>::identity(T& element) const
+    Magma<T>::identity_extract(T& element) const
     {
         HashMap<T, bool> flagged;
         for (auto&& i : _set)
         {
             flagged[i] = true ;
             for (auto&& element : _set)
-                if (!(at(element, i) == element && at(i, element) == element))
+                if (!(this->at(element, i) == element && this->at(i, element) == element))
                     flagged[i] = false ;
         }
         for (auto&& i : _set)
@@ -207,8 +206,8 @@ namespace zebra
     bool
     Magma<T>::left_cancellative() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(x, y) == at(x, z) && y == z ;
+        return all3(_set, [this] (auto x, auto y, auto z)  -> bool {
+            return this->at(x, y) == this->at(x, z) && y == z ;
         });
     }
     
@@ -216,8 +215,8 @@ namespace zebra
     bool
     Magma<T>::right_cancellative() const
     {
-        return all3(_set, [this] (auto x, auto y, auto z) {
-            return at(y, x) == at(z, x) && y == z ;
+        return all3(_set, [this] (auto x, auto y, auto z) -> bool {
+            return this->at(y, x) == this->at(z, x) && y == z ;
         });
     }
     
@@ -225,8 +224,8 @@ namespace zebra
     bool
     Magma<T>::left_zero_semigroup() const 
     {
-        return all2(_set, [this] (auto x, auto y) {
-            return x == at(x, y);
+        return all2(_set, [this] (auto x, auto y)  -> bool {
+            return x == this->at(x, y);
         });
     }
     
@@ -234,8 +233,8 @@ namespace zebra
     bool
     Magma<T>::right_zero_semigroup() const 
     {
-        return all2(_set, [this] (auto x, auto y) {
-            return x == at(y, x);
+        return all2(_set, [this] (auto x, auto y) -> bool {
+            return x == this->at(y, x);
         });
     }
     

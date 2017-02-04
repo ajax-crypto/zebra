@@ -36,6 +36,22 @@ namespace std
     CREATE_ITERATOR_KEYS(unsigned int, hash);
     CREATE_ITERATOR_KEYS(double, hash);
     CREATE_ITERATOR_KEYS(long double, hash);
+
+    template <typename T> inline size_t pair_converter(const pair<T, T>& p) 
+    { 
+        return static_cast<int>(*p.first) ^ static_cast<int>(*p.second); 
+    }
+
+    template <typename T> using HashMap_Node = typename zebra::Set<T>::const_iterator;
+    template <typename T> using Iterator_Node_Pair = typename zebra::Pair<HashMap_Node<T>, HashMap_Node<T>>;
+
+    CREATE_ITERATOR_KEYS_FOR_MAP(int);
+    CREATE_ITERATOR_KEYS_FOR_MAP(long int);
+    CREATE_ITERATOR_KEYS_FOR_MAP(long long int);
+    CREATE_ITERATOR_KEYS_FOR_MAP(float);
+    CREATE_ITERATOR_KEYS_FOR_MAP(unsigned int);
+    CREATE_ITERATOR_KEYS_FOR_MAP(double);
+    CREATE_ITERATOR_KEYS_FOR_MAP(long double);
     
 }
 

@@ -12,7 +12,6 @@ namespace zebra
         using typename Magma<T>::bin_op_type;
         using typename Magma<T>::titer ;
         using typename Magma<T>::param_type;
-        using typename Magma<T>::entry_type;
         using typename Magma<T>::table_type;
         using typename Magma<T>::iter ;
         using Magma<T>::idempotent;
@@ -29,12 +28,9 @@ namespace zebra
         bool regular() const ;
         bool separative() const ;
         
-        ISB(Set<T>)  principal_left_ideal(T) const ;
-        ISNB(Set<T>) principal_left_ideal(const T&) const ;
-        ISB(Set<T>)  principal_right_ideal(T) const ;
-        ISNB(Set<T>) principal_right_ideal(const T&) const ;
-        ISB(Set<T>)  principal_ideal(T) const ;
-        ISNB(Set<T>) principal_ideal(const T&) const ;
+        Set<T> principal_left_ideal(T) const ;
+        Set<T> principal_right_ideal(T) const ;
+        Set<T> principal_ideal(T) const ;
         
         bool L(T, T) const ;
         bool R(T, T) const ;
@@ -62,21 +58,21 @@ namespace zebra
     
     template <typename T>
     SemiGroup<T>::SemiGroup(const table_type& table, const Set<T>& set)
-        : BinaryOperation<T>{table, set}
+        : Magma<T>{table, set}
     {
         check();
     }
     
     template <typename T>
     SemiGroup<T>::SemiGroup(iter start, iter end, const Set<T>& set)
-        : BinaryOperation<T>{start, end, set}
+        : Magma<T>{start, end, set}
     {
         check();
     }
     
     template <typename T>
     SemiGroup<T>::SemiGroup(bin_op_type&& func, const Set<T>& set)
-        : BinaryOperation<T>{func, set}
+        : Magma<T>{std::move(func), set}
     {
         check();
     }
@@ -89,7 +85,7 @@ namespace zebra
         {
             bool exists = false ;
             for (auto&& y : _set)
-                if (at(x, at(y, x)) == x && at(y, at(x, y)) == y)
+                if (this->at(x, this->at(y, x)) == x && this->at(y, this->at(x, y)) == y)
                 {
                     exists = true ;
                     break ;
@@ -111,8 +107,8 @@ namespace zebra
         rhs.insert(b);
         for (auto&& x : _set)
         {
-            lhs.insert(at(x, a));
-            rhs.insert(at(x, b));
+            lhs.insert(this->at(x, a));
+            rhs.insert(this->at(x, b));
         }
         return lhs == rhs ;
     }
@@ -128,8 +124,8 @@ namespace zebra
         rhs.insert(b);
         for (auto&& x : _set)
         {
-            lhs.insert(at(a, x));
-            rhs.insert(at(b, x));
+            lhs.insert(this->at(a, x));
+            rhs.insert(this->at(b, x));
         }
         return lhs == rhs ;
     }
@@ -145,12 +141,12 @@ namespace zebra
         rhs.insert(b);
         for (auto&& x : _set)
         {
-            lhs.insert(at(x, a));
-            lhs.insert(at(a, x));
-            lhs.insert(at(x, at(a, x)));
-            rhs.insert(at(x, b));
-            rhs.insert(at(b, x));
-            rhs.insert(at(x, at(b, x)));
+            lhs.insert(this->at(x, a));
+            lhs.insert(this->at(a, x));
+            lhs.insert(this->at(x, this->at(a, x)));
+            rhs.insert(this->at(x, b));
+            rhs.insert(this->at(b, x));
+            rhs.insert(this->at(x, this->at(b, x)));
         }
         return lhs == rhs ;
     }

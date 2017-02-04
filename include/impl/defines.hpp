@@ -24,7 +24,17 @@
         {                                                                   \
             return converter<type>()(*it);                                  \
         }                                                                   \
-    };                                                                     
+    };                                                                      
+
+#define CREATE_ITERATOR_KEYS_FOR_MAP(type)        \
+    template <>                                                     \
+    struct hash<Iterator_Node_Pair<type>>                           \
+    {                                                               \
+        size_t operator()(const Iterator_Node_Pair<type>& it) const \
+        {                                                           \
+            return pair_converter<HashMap_Node<type>>(it);          \
+        }                                                           \
+    };                                                                   
         
 #define CREATE_SET_KEYS(type, converter) \
     template <>                                                            \
@@ -32,7 +42,7 @@
     {                                                                      \
         size_t operator()(const zebra::Set<type>& p) const                 \
         {                                                                  \
-            size_t val = 0u ;                                               \
+            size_t val = 0u ;                                              \
             for (const type& element : p)                                  \
                 val ^= converter<type>()(element) ;                        \
             return val ;                                                   \
@@ -45,7 +55,7 @@
     {                                                                      \
         size_t operator()(const pair<type1, type2>& p) const               \
         {                                                                  \
-            return converter<type1>()(p.first) ^ converter<type2>()(p.second);         \
+            return converter<type1>()(p.first) ^ converter<type2>()(p.second); \
         }                                                                  \
     };   
     

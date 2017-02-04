@@ -46,9 +46,9 @@ namespace zebra
         template <typename A> friend Set<Set<A>> operator/(const Group<A>&, const Group<A>&);
         template <typename A> friend Group<A> operator*(const Group<A>&, const Group<A>&);
         template <typename A> friend bool is_homomorphism(const Group<A>&, const Group<A>&, const Mapping<A, A>&);
-        template <typename A> friend bool is_group(const Set<A>&, const std::function<T(T, T)>&);
-        template <typename A> friend bool is_group(const Set<A>&, const HashMap<Pair<T, T>, T>&);
-        template <typename A> friend bool is_group(const Set<A>&, const Set<Triple<T, T, T>>&);
+        template <typename A> friend bool is_group(const Set<A>&, const std::function<A(A, A)>&);
+        template <typename A> friend bool is_group(const Set<A>&, const HashMap<Pair<A, A>, A>&);
+        template <typename A> friend bool is_group(const Set<A>&, const Set<Triple<A, A, A>>&);
         
         template <typename G, typename S> friend class GroupAction;
         template <typename A> friend class GroupHomomorphism; 
@@ -70,7 +70,7 @@ namespace zebra
     
     template <typename T>
     Group<T>::Group(bin_op_type&& func, const Set<T>& set)
-        : Monoid<T>{func, set}
+        : Monoid<T>{std::move(func), set}
     {
         check();
     }
@@ -153,8 +153,8 @@ namespace zebra
         for (auto&& x : set)
             if (_set.find(x) == _set.cend())
                 return false;
-        auto mapf = [this] (T a, T b) -> T { return this->at(a, b); };
-        return is_group(set, mapf);
+        std::function<T(T, T)> mapf = [this] (T a, T b) -> T { return this->at(a, b); };
+        return zebra::is_group<T>(set, mapf);
     }
 
     template <typename T>
@@ -165,7 +165,7 @@ namespace zebra
             return false;
         for (auto&& pair : group._table)
         {
-            if (_table.count(pair.first) == 0 || _table[pair.first] != pair.second)
+            if (_table.count(pair.first) == 0 || _table.at(pair.first) != pair.second)
                 return false;
         }
         return true;
@@ -207,7 +207,7 @@ namespace zebra
             return false;
         if (at(_identity, _identity) != _identity)
             return false;
-        auto subs = subsets(_set);
+        auto subs = all_subsets(_set);
         for (auto&& sub : subs)
             if (normal_subgroup(sub))
                 return false ;
@@ -639,7 +639,7 @@ namespace zebra
     bool
     GroupAction<G, S>::ginvariant(S x) const
     {
-        return all(_gset, [this, &x](auto g,) {
+        return all(_gset, [this, &x](auto g) {
             return this->at(Pair<G, S>(g, x)) == x;
         });
     }
