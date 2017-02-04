@@ -115,8 +115,8 @@ namespace zebra
     QuasiGroup<T>::total_antisymmetric() const 
     {
         return all3(_set, [this](auto c, auto x, auto y) -> bool {
-            return (at(c, at(x, y)) == at(at(c, y), x) && x == y) &&
-                   (at(x, y) == at(x, y) && x == y);
+            return (at(c, at(x, y)) == at(at(c, y), x) ? x == y : true) &&
+                   (at(x, y) == at(y, x) ? x == y : true);
         });
     }
 }

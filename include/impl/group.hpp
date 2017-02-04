@@ -504,10 +504,15 @@ namespace zebra
         bool free() const ;
         bool regular() const { return transitive() && free(); }
         Set<S> orbit(S) const ;
-        S fixed_point(G) const ;
-        G fixes(S) const ;
-        Set<Pair<G, S>> all_fixed_points() const;
+        Set<Set<S>> orbit_space() const;
+        bool invariant(const Set<S>&) const ;
+        bool fixed(const Set<S>&) const ;
+        bool ginvariant(S) const ;
+        Set<S> ginvariants() const ;
+        bool fixed_point(G, S) const ;
         Set<G> stabilizer_subgroup(S) const ;
+
+        using Mapping<Pair<G, S>, S>::at ;
 
     protected:
         using Mapping<Pair<G, S>, S>::_from ;
@@ -515,6 +520,8 @@ namespace zebra
         using Mapping<Pair<G, S>, S>::_relation ;
 
         Set<G> _gset;
+
+        template <typename A, typename B> friend operator/(const Set<A>&, const Group<B>&);
     };
 
     template <typename G, typename S>
@@ -580,6 +587,90 @@ namespace zebra
         return all(_gset, _gset, _codomain, [this](auto g, auto h, auto x){
             return this->at(Pair<G, S>(g, x)) == this->at(Pair<G, S>(h, x)) ? g == h : true ;
         });
+    }
+
+    template <typename G, typename S>
+    Set<S>
+    GroupAction<G, S>::orbit(S x) const 
+    {
+        Set<S> result ;
+        for (auto&& g : _gset)
+            result.insert(at(Pair<G, S>(g, x)));
+        return result;
+    }
+
+    template <typename G, typename S>
+    Set<Set<S>>
+    GroupAction<G, S>::orbit_space() const 
+    {
+        Set<Set<S>> result ;
+        for (auto&& x : _codomain)
+            result.insert(orbit(x));
+        return result;
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::invariant(const Set<S>& set) const
+    {
+        for (auto&& x : set)
+            if (_codomain.find(x) == _codomain.end())
+                return false;
+        Set<S> result ;
+        each(_gset, set, [&result, this](auto g, auto y) mutable {
+            result.insert(this->at(Pair<G, S>(g, y)));
+        });
+        return result;
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::fixed(const Set<S>& set) const
+    {
+        for (auto&& x : set)
+            if (_codomain.find(x) == _codomain.end())
+                return false;
+        return all(_gset, set, [this](auto g, auto y) {
+            return this->at(Pair<G, S>(g, y)) == y;
+        });
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::ginvariant(S x) const
+    {
+        return all(_gset, [this, &x](auto g,) {
+            return this->at(Pair<G, S>(g, x)) == x;
+        });
+    }
+
+    template <typename G, typename S>
+    Set<S>
+    GroupAction<G, S>::ginvariants() const 
+    {
+        Set<S> result ;
+        for (auto&& x : _codomain)
+            if (ginvariant(x))
+                result.insert(x);
+        return result;
+    }
+
+    template <typename G, typename S>
+    bool
+    GroupAction<G, S>::fixed_point(G g, S x) const
+    {
+        return at(Pair<G, S>(g, x)) == x ;
+    } 
+
+    template <typename G, typename S>
+    Set<G>
+    GroupAction<G, S>::stabilizer_subgroup(S x) const
+    {
+        Set<G> result;
+        for (auto&& g : _gset)
+            if (at(Pair<G, S>(g, x)) == x)
+                result.insert(g);
+        return result;
     }
 
 }
