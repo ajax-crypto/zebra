@@ -413,6 +413,17 @@ namespace zebra
         result.insert(set);
         return result;
     }
+
+    template <typename T, template <typename> class Parent> class Sub : public Parent<T>
+    {
+        using Parent<T>::Parent;
+    public:
+        std::shared_ptr<Parent<T>> parent() const { return _parent; }
+    protected:
+        std::shared_ptr<Parent<T>> _parent ;
+    };
+
+    template <typename T> using Subset = Sub<T, Set>;
     
 }
 

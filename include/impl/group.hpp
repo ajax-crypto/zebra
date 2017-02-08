@@ -54,6 +54,8 @@ namespace zebra
         template <typename G, typename S> friend class GroupAction;
         template <typename A> friend class GroupHomomorphism; 
     };
+
+    template <typename T> using Subgroup = Sub<T, Group>;
     
     template <typename T>
     Group<T>::Group(const table_type& table, const Set<T>& set)
