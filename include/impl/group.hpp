@@ -6,9 +6,9 @@
 
 namespace zebra
 {
-    template <typename A> bool is_group(const Set<A>&, const std::function<A(A, A)>&);
-    template <typename A> bool is_group(const Set<A>&, const HashMap<Pair<A, A>, A>&);
-    template <typename A> bool is_group(const Set<A>&, const Set<Triple<A, A, A>>&);
+    template <typename A> Error is_group(const Set<A>&, const std::function<A(A, A)>&);
+    template <typename A> Error is_group(const Set<A>&, const HashMap<Pair<A, A>, A>&);
+    template <typename A> Error is_group(const Set<A>&, const Set<Triple<A, A, A>>&);
     
     template <typename T>
     class Group : public Monoid<T>
@@ -177,7 +177,7 @@ namespace zebra
     Group<T>::normal_subgroup(const Set<T>& set) const
     {
         if (!subgroup(set))
-            throw Exception(NOT_CONFORMANT, "The set does not form a subgroup...");
+            return false;
         for (auto&& x : _set)
         {
             if (left_coset(set, x) != right_coset(set, x))
@@ -191,7 +191,7 @@ namespace zebra
     Group<T>::normal_subgroup(const Group<T>& group) const
     {
         if (!subgroup(group))
-            throw Exception(NOT_CONFORMANT, "The group does not form a subgroup...");
+            return false;
         for (auto&& x : group._set)
         {
             if (left_coset(group, x) != right_coset(group, x))
@@ -208,10 +208,13 @@ namespace zebra
             return false;
         if (at(_identity, _identity) != _identity)
             return false;
-        auto subs = all_subsets(_set);
+        Set<Set<T>> subs = all_subsets(_set);
+        // Check if any non-trivial group is also normal subgroup
+        // If that is the case, then it is not simple
         for (auto&& sub : subs)
-            if (normal_subgroup(sub))
-                return false ;
+            if (sub.size() > 1 && sub.find(_identity) != sub.end())
+                if (normal_subgroup(sub))
+                    return false ;
         return true;
     }
 
@@ -324,18 +327,18 @@ namespace zebra
         return true;
     }
 
-    template <typename A> bool is_group(const Set<A>& set, const std::function<A(A, A)>& map)
+    template <typename A> Error is_group(const Set<A>& set, const std::function<A(A, A)>& map)
     {
         bool closed = all2(set, [&map, &set](auto x, auto y) {
             return set.find(map(x, y)) != set.end();
         });
         if (!closed)
-            return false;
+            return Error{NOT_CLOSED};
         bool associative = all3(set, [&map](auto x, auto y, auto z) {
             return map(x, map(y, z)) == map(map(x, y), z);
         });
         if (!associative)
-            return false;
+            return Error{NOT_ASSOCIATIVE};
         A identity ;
         bool has_identity = false ;
         for (auto&& x : set)
@@ -351,7 +354,7 @@ namespace zebra
                 break ;
         }
         if (!has_identity)
-            return false ;
+            return Error{NO_IDENTITY};
         bool has_inverse = false; 
         for (auto&& x : set)
         {
@@ -364,16 +367,16 @@ namespace zebra
             if (has_inverse)
                 break ;
         }
-        return has_inverse;
+        return has_inverse ? Error{NO_ERROR} : Error{NO_INVERSE};
     }
 
-    template <typename A> bool is_group(const Set<A>& set, const HashMap<Pair<A, A>, A>& map)
+    template <typename A> Error is_group(const Set<A>& set, const HashMap<Pair<A, A>, A>& map)
     {
         auto mapf = [&map] (A a, A b) -> A { return map[Pair<A, A>(a, b)]; };
         return is_group<A>(set, mapf);
     }
 
-    template <typename A> bool is_group(const Set<A>& set, const Set<Triple<A, A, A>>& triples)
+    template <typename A> Error is_group(const Set<A>& set, const Set<Triple<A, A, A>>& triples)
     {
         auto mapf = [&triples] (A a, A b) -> A { 
             for (auto&& triplet : triples)
