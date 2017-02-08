@@ -6,6 +6,10 @@
 
 namespace zebra
 {
+    template <typename A> bool is_group(const Set<A>&, const std::function<A(A, A)>&);
+    template <typename A> bool is_group(const Set<A>&, const HashMap<Pair<A, A>, A>&);
+    template <typename A> bool is_group(const Set<A>&, const Set<Triple<A, A, A>>&);
+    
     template <typename T>
     class Group : public Monoid<T>
     {
@@ -46,9 +50,6 @@ namespace zebra
         template <typename A> friend Set<Set<A>> operator/(const Group<A>&, const Group<A>&);
         template <typename A> friend Group<A> operator*(const Group<A>&, const Group<A>&);
         template <typename A> friend bool is_homomorphism(const Group<A>&, const Group<A>&, const Mapping<A, A>&);
-        template <typename A> friend bool is_group(const Set<A>&, const std::function<A(A, A)>&);
-        template <typename A> friend bool is_group(const Set<A>&, const HashMap<Pair<A, A>, A>&);
-        template <typename A> friend bool is_group(const Set<A>&, const Set<Triple<A, A, A>>&);
         
         template <typename G, typename S> friend class GroupAction;
         template <typename A> friend class GroupHomomorphism; 
@@ -154,7 +155,7 @@ namespace zebra
             if (_set.find(x) == _set.cend())
                 return false;
         std::function<T(T, T)> mapf = [this] (T a, T b) -> T { return this->at(a, b); };
-        return zebra::is_group<T>(set, mapf);
+        return zebra::is_group(set, mapf);
     }
 
     template <typename T>

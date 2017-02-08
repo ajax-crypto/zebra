@@ -3,8 +3,9 @@
 void relation_testing()
 {
     using namespace zebra;
-    std::cout << "\nRelation testing... [START]" << std::endl ;
+    std::cout << "\n[START]Relation testing... " << std::endl ;
     Set<int> set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+    std::cout << "Relation is <= defined on " << set << std::endl;
     BinaryRelation<int, int> relation{[](int x, int y) { return x <= y; }, set};
     std::cout << relation << std::endl ;
     std::cout << "Is reflexive ? " << relation.reflexive() << std::endl ;
@@ -25,11 +26,11 @@ void group_testing()
 {
     using namespace zebra;
     std::cout << "\nGroup testing... [START]" << std::endl ;
-    Set<int> set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+    Set<int> set({ 0, 1, 2, 3, 4, 5, 6, 7, 8 });
+    std::cout << "Group with set: " << set << " and operation: modulo-9 addition..." << std::endl;
     Group<int> group([](int x, int y){ return (x + y) % 9; }, set);
     std::cout << "Is simple ? " << group.simple() << std::endl ;
     std::cout << "Is trace ? " << group.trace() << std::endl ;
-    std::cout << "Is 0-sum free ? " << group.zerosumfree() << std::endl ;
     std::cout << "Is regular ? " << group.regular() << std::endl ;
     std::cout << "Is band ? " << group.band() << std::endl ;
     std::cout << "Is semilattice ? " << group.semilattice() << std::endl ;
